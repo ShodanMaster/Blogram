@@ -30,11 +30,11 @@
                 <li><a class="dropdown-item" href="#">Something else here</a></li>
               </ul>
             </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{route('changepassword')}}">Change Password</a>
+            </li>
           </ul>
-          <form class="d-flex mt-3" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-          </form>
+            <a href="{{route('loggingout')}}"><button class="btn btn-outline-danger" type="button">Logout</button></a>
         </div>
       </div>
     </div>
