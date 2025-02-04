@@ -1,6 +1,6 @@
 @extends('app.master')
 @section('content')
-    <div class="card bg-dark">
+    <div class="card bg-dark m-5">
         <div class="card-header bg-secondary text-white text-center fs-4">
             Change Password
         </div>
