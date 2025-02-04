@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
@@ -36,4 +37,8 @@ ROute::middleware('auth')->group(function(){
         Route::post('update-profile', [ProfileController::class, 'updateProfile'])->name('updateprofile');
     });
 
+    Route::prefix('blog')->name('blog.')->group(function () {
+        Route::post('store-blog', [BlogController::class, 'storeBlog'])->name('storeblog');
+        Route::post('delete-blog', [BlogController::class, 'deleteBlog'])->name('deleteblog');
+    });
 });

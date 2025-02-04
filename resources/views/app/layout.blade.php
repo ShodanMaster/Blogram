@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{asset('cropper/cropper.min.css')}}">
     <link rel="stylesheet" href="{{asset('bootstrap/bootstrap.min.css')}}">
     <link rel="stylesheet" href="{{asset('sweetalert/sweetalert2.min.css')}}">
-
+    @stack('head')
 
 </head>
 <body class="bg-dark text-white">
