@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class="card-footer d-flex justify-content-between">
-              <a href="">Login with Google</a>  <button class="btn btn-primary">Login</button>
+                <a href="{{route('auth.google')}}">Login with Google</a>  <button class="btn btn-primary">Login</button>
             </div>
         </form>
 

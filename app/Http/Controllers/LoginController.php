@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class LoginController extends Controller
 {
@@ -76,16 +80,71 @@ class LoginController extends Controller
         }
     }
 
+    public function googlePage(){
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function googleCallBack(){
+        try {
+
+            $user = Socialite::driver('google')->user();
+
+            $finduser = User::where('google_id', $user->id)->first();
+
+            if($finduser)
+
+            {
+
+                Auth::login($finduser);
+
+                return redirect()->intended('');
+
+            }
+
+            else
+
+            {
+                $newUser = User::create([
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'google_id'=> $user->id,
+                    'password' => encrypt('123456dummy')
+                ]);
+
+                Auth::login($newUser);
+
+                return redirect()->intended('');
+            }
+
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Something Went Wrong! '.$e->getMessage());
+        }
+    }
+
     public function changePassword(){
         return view('login.changepassword');
     }
 
     public function passwordChange(Request $request){
         // dd($request->all());
-        return redirect()->back()->with('success', 'Hai');
+        $request->validate([
+            'currentpassword' => 'required|string|min:8',
+            'password' => 'required|string|confirmed',
+        ]);
 
+        try{
+            if (Hash::check($request->currentpassword, Auth::user()->password)) {
+                Auth::user()->update([
+                    'password' => bcrypt($request->password), // Fix typo: 'password' instead of 'passowrd'
+                ]);
+                return redirect()->back()->with('success','Password Changed Successfully');
+            }else{
+                return redirect()->back()->with('success','Current Password Does Not match');
+            }
+        }catch(Exception $e){
+            return redirect()->back()->with('error', 'Something went Wrong! '. $e->getMessage());
+        }
     }
-
 
     public function loggingOut(){
         auth()->logout();

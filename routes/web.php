@@ -19,6 +19,9 @@ Route::get('login', [LoginController::class, 'index'])->name('login');
 Route::post('logging-in', [LoginController::class, 'loggingIn'])->name('loggingin');
 Route::post('register-user', [LoginController::class, 'registerUser'])->name('registeruser');
 
+Route::get('auth/google',[LoginController::class, 'googlePage'])->name('auth.google');
+Route::get('auth/google/callback',[LoginController::class, 'googleCallBack'])->name('auth.google.callback');
+
 ROute::middleware('auth')->group(function(){
     Route::get('/',[IndexController::class, 'index'])->name('index');
     Route::get('/load-more-blogs', [IndexController::class, 'loadMoreBlogs'])->name('loadMoreBlogs');
