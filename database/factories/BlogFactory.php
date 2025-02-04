@@ -19,6 +19,7 @@ class BlogFactory extends Factory
     public function definition()
     {
         return [
+            'user_id' => 1,
             'title' => $this->faker->sentence, // Random sentence for the title
             'content' => $this->faker->paragraph, // Random paragraph for the content
         ];

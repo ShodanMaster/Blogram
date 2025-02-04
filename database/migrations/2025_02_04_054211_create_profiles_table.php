@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users');
+            $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
+            $table->text('bio')->nullable();
+            $table->string('profile_image')->nullable();
             $table->timestamps();
         });
     }

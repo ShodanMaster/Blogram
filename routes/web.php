@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,5 +30,10 @@ ROute::middleware('auth')->group(function(){
     Route::get('change-password', [LoginController::class, 'changePassword'])->name('changepassword');
     Route::post('password-change', [LoginController::class, 'passwordChange'])->name('passwordchange');
     Route::get('logging-out', [LoginController::class, 'loggingOut'])->name('loggingout');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('', [ProfileController::class, 'index'])->name('index');
+        Route::post('update-profile', [ProfileController::class, 'updateProfile'])->name('updateprofile');
+    });
 
 });

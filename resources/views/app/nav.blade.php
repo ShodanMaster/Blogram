@@ -11,14 +11,14 @@
         </div>
         <div class="offcanvas-body">
             <div class="card bg-dark">
-                
+
             </div>
           <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
             <li class="nav-item">
               <a class="nav-link active text-white" aria-current="page" href="{{route('index')}}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-white" href="#">Link</a>
+              <a class="nav-link text-white" href="{{route('profile.index')}}">Profile</a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

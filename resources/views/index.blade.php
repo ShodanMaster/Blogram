@@ -3,7 +3,7 @@
 @section('content')
     <h1>Index</h1>
     <div id="blog-container">
-        @foreach ($blogs as $blog)
+        @forelse ($blogs as $blog)
             <div class="card bg-dark mb-3">
                 <div class="card-header bg-secondary text-white fs-4">
                     {{ $blog->title }}
@@ -12,14 +12,18 @@
                     {{ $blog->content }}
                 </div>
             </div>
-        @endforeach
+        @empty
+            <p class="text-center text-white">NoData</p>
+        @endforelse
     </div>
 
-    <div id="loading-spinner" class="d-flex justify-content-center" style="display:none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+    @if (count($blogs)> 0)
+        <div id="loading-spinner" class="d-flex justify-content-center" style="display:none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
-    </div>
+    @endif
 
 @endsection
 
