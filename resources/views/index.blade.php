@@ -48,18 +48,48 @@
                         @if(Auth::check() && Auth::id() == $blog->user_id)
                             <li><a class="dropdown-item" href="#" id="deleteBlog" data-id="{{ encrypt($blog->id) }}">Delete Blog</a></li>
                             <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editBlogModal"
-                                   data-id="{{ encrypt($blog->id) }}"
-                                   data-title="{{ $blog->title }}"
-                                   data-content="{{ $blog->content }}">
-                                   Edit Blog</a>
+                                data-id="{{encrypt($blog->id)}}"
+                                data-title = "{{$blog->title}}"
+                                data-content = "{{$blog->content}}"
+                                >
+                                Edit2</a>
                             </li>
                         @endif
                         <li><a class="dropdown-item" href="#">Menu item 3</a></li>
                     </ul>
                 </div>
+
             </div>
             <div class="card-body text-white text-center">
                 {!! $blog->content !!}
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <div class="user d-flex align-items-center">
+                    @if($blog->user->profile && $blog->user->profile->profile_image)
+                    {{-- <p class="text-white">{{$blog->user->profile->profile_image}}</p> --}}
+                        <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
+
+                    @else
+                        <img src="{{ asset('defaults/default_profile.jpeg') }}"
+                            alt="No profile photo"
+                            title="No profile photo"
+                            class="rounded-circle" width="40" height="40">
+                    @endif
+                    <span class="ms-2 text-white">{{ $blog->user->name }}</span>
+                </div>
+                <div class="like">
+                    <button type="button" class="btn btn-primary" id="likeButton" value="{{ encrypt($blog->id) }}">
+                        @if(auth()->check() && auth()->user()->likedBlogs()->where('blog_id', $blog->id)->exists())
+                            Unlike
+                        @else
+                            Like
+                        @endif
+                    </button>
+                    <span id="likeCount{{ $blog->id }}" class="text-white">
+                        {{ $blog->likedUsers()->count() }} Likes
+                    </span>
+                </div>
+
             </div>
         </div>
     @empty
@@ -229,5 +259,43 @@
         });
 
     });
+
+    $(document).on('click', '#likeButton', function (e) {
+        e.preventDefault();  // Prevent the default action
+
+        var blogId = $(this).val();  // Get the blog ID from the button value
+        var button = $(this);  // The like/unlike button
+        var likeCountElement;  // The like count span for this blog
+
+        $.ajax({
+            url: "{{ route('blog.likeblog') }}",  // Your route for liking the blog
+            method: 'POST',
+            data: {
+                blog_id: blogId,
+                _token: '{{ csrf_token() }}',  // CSRF token for security
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Toggle the button text based on the response
+                    if (response.message === 'added') {
+                        button.text('Unlike');  // Change button text to 'Unlike'
+                    } else {
+                        button.text('Like');  // Change button text back to 'Like'
+                    }
+
+                    // Update the like count on the UI
+                    likeCountElement = $('#likeCount' + response.blogId);
+                    likeCountElement.text(response.likeCount + ' Likes');  // Set the new like count
+                } else {
+                    alert('Something went wrong. Please try again.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('There was an error. Please try again later.');
+            }
+        });
+    });
+
 </script>
 @endsection

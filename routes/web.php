@@ -41,5 +41,8 @@ ROute::middleware('auth')->group(function(){
         Route::post('store-blog', [BlogController::class, 'storeBlog'])->name('storeblog');
         Route::post('update-blog', [BlogController::class, 'updateBlog'])->name('updateblog');
         Route::post('delete-blog', [BlogController::class, 'deleteBlog'])->name('deleteblog');
+
+        Route::post('like-blog', [BlogController::class, 'likeBlog'])->name('likeblog');
+
     });
 });

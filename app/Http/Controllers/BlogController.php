@@ -98,4 +98,41 @@ class BlogController extends Controller
         }
     }
 
+    public function likeBlog(Request $request){
+        $blogId = decrypt($request->blog_id);  // Decrypt the blog ID
+        $blog = Blog::find($blogId);
+
+        if ($blog) {
+            $user = auth()->user();  // Get the authenticated user
+
+            // Check if the user has already liked the blog
+            if ($user->likedBlogs()->where('blog_id', $blogId)->exists()) {
+                // If already liked, remove the like
+                $user->likedBlogs()->detach($blogId);
+                $status = 'removed';  // The like was removed
+            } else {
+                // If not liked, add the like
+                $user->likedBlogs()->attach($blogId);
+                $status = 'added';  // The like was added
+            }
+
+            // Get the updated like count (number of users who liked this blog)
+            $likeCount = $blog->likedUsers()->count();
+            // dd($likeCount);
+            // Return the response with the updated like count and status
+            return response()->json([
+                'status' => 'success',
+                'message' => $status,
+                'blogId' => $blog->id,
+                'likeCount' => $likeCount,  // Updated like count
+            ]);
+        }
+
+        // If blog is not found
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Blog not found.',
+        ]);
+    }
+
 }

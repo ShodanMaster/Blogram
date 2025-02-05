@@ -51,4 +51,9 @@ class User extends Authenticatable
     public function blogs(){
         return $this->hasMany(Blog::class);
     }
+
+    public function likedBlogs()
+    {
+        return $this->belongsToMany(Blog::class)->withTimestamps();
+    }
 }

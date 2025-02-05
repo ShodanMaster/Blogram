@@ -173,6 +173,14 @@
             <div class="card-body text-white text-center">
                 {!! $blog->content !!}
             </div>
+            <div class="card-footer d-flex justify-content-between">
+                <div class="user">
+                    
+                </div>
+                <div class="like">
+                    <button type="button" class="btn btn-primary">Like</button>
+                </div>
+            </div>
         </div>
     @empty
         <p class="text-center text-white">NoData</p>
