@@ -36,6 +36,36 @@ class BlogController extends Controller
         }
     }
 
+    public function updateBlog(Request $request){
+        // dd($request->all());
+        try{
+            $blog = Blog::find(decrypt($request->id));
+
+            if ($blog) {
+                $blog->update([
+                    'user_id' => Auth::user()->id,
+                    'title' => $request->title,
+                    'content' => $request->content,
+                ]);
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Blog Updated Successfully',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Blog Not Found',
+                ], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something Went Wrong: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function deleteBlog(Request $request){
 
         // dd($request->all());

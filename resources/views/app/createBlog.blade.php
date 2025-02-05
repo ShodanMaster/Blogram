@@ -16,7 +16,7 @@
                     <h1 class="modal-title fs-5" id="createBlogModalLabel">Create Blog</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="createBlog" enctype="multipart/form-data">
+                <form id="createBlog">
                     <div class="modal-body bg-dark">
                         <div class="form-group">
                             <label for="blog_title" class="form-label">Blog Title: </label>
