@@ -69,6 +69,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('delete-comment', [AdminController::class, 'deleteComment'])->name('deletecomment');
 
 
+    Route::get('blogs', [AdminController::class, 'blogs'])->name('blogs');
+
 });
 
 

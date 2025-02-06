@@ -149,4 +149,9 @@ class AdminController extends Controller
         }
     }
 
+    public function blogs(){
+        $blogs = Blog::all();
+        return view('admin.blogs.blogs', compact('blogs'));
+    }
+
 }
