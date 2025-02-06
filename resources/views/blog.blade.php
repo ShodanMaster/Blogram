@@ -365,7 +365,7 @@
 
         Swal.fire({
             title: 'Are you sure?',
-            text: 'Do you want to delete this blog?',
+            text: 'Do you want to delete this comment?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, delete it!',

@@ -56,7 +56,7 @@
             var statusTextElement;
 
             $.ajax({
-                url: "{{ route('admin.banunban') }}",
+                url: "{{ route('admin.banunbanuser') }}",
                 method: 'POST',
                 data: {
                     user_id: userId,

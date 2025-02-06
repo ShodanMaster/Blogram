@@ -306,7 +306,7 @@
 
         Swal.fire({
             title: 'Are you sure?',
-            text: 'Do you want to delete this blog?',
+            text: 'Do you want to delete this Comment?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, delete it!',
@@ -316,7 +316,7 @@
             if (result.isConfirmed) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('conversation.deletecomment') }}",
+                    url: "{{ route('admin.deletecomment') }}",
                     data: formData,
                     processData: false,
                     contentType: false,

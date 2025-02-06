@@ -9,6 +9,8 @@
 	<meta name="author" content="AdminKit">
 	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
 
@@ -18,6 +20,8 @@
 
 	<link href="{{asset('adminasset/css/app.css')}}" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{asset('sweetalert/sweetalert2.min.css')}}">
+
 </head>
 
 <body>
@@ -180,6 +184,7 @@
 
     <script src="{{asset('adminasset/js/app.js')}}"></script>
     <script src="{{asset('js/jquery-3.6.0.min.js')}}"></script>
+    <script src="{{asset('sweetalert/sweetalert2.min.js')}}"></script>
     @yield('scripts')
 
     <script>

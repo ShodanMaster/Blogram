@@ -98,6 +98,15 @@
                         {{ $blog->likedUsers()->count() }} Likes
                     </span>
                 </div>
+                <div class="blog-card">
+                    <span id="blogStatus{{ $blog->id }}" class="badge {{ $blog->ban ? 'bg-danger' : 'bg-success' }}">
+                        {{ $blog->ban ? 'Banned' : 'Active' }}
+                    </span>
+
+                    <button type="button" class="btn btn-{{ $blog->ban ? 'success' : 'danger' }}" id="banButton" value="{{ $blog->id }}">
+                        {{ $blog->ban ? 'Unban' : 'Ban' }}
+                    </button>
+                </div>
             </div>
         </div>
     @empty
@@ -117,32 +126,30 @@
 @endsection
 @section('scripts')
     <script>
-        $(document).on('click', '#likeButton', function (e) {
-            e.preventDefault();  // Prevent the default action
+        $(document).on('click', '#banButton', function (e) {
+            e.preventDefault();
 
-            var blogId = $(this).val();  // Get the blog ID from the button value
-            var button = $(this);  // The like/unlike button
-            var likeCountElement;  // The like count span for this blog
+            var blogId = $(this).val();
+            var button = $(this);
+            var statusTextElement;
 
             $.ajax({
-                url: "{{ route('blog.likeblog') }}",  // Your route for liking the blog
+                url: "{{ route('admin.banunbanblog') }}",
                 method: 'POST',
                 data: {
                     blog_id: blogId,
-                    _token: '{{ csrf_token() }}',  // CSRF token for security
+                    _token: '{{ csrf_token() }}',
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        // Toggle the button text based on the response
-                        if (response.message === 'added') {
-                            button.text('Unlike');  // Change button text to 'Unlike'
+                        if (response.message === 'banned') {
+                            button.text('Unban');
                         } else {
-                            button.text('Like');  // Change button text back to 'Like'
+                            button.text('Ban');
                         }
 
-                        // Update the like count on the UI
-                        likeCountElement = $('#likeCount' + response.blogId);
-                        likeCountElement.text(response.likeCount + ' Likes');  // Set the new like count
+                        statusTextElement = $('#blogStatus' + response.blogId);
+                        statusTextElement.text(response.blogStatus);
                     } else {
                         alert('Something went wrong. Please try again.');
                     }

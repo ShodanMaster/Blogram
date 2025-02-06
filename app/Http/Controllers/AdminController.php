@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\Comment;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class AdminController extends Controller
         return view('admin.users.users', compact('users'));
     }
 
-    public function banUnban(Request $request)
+    public function banUnbanUser(Request $request)
     {
         $userId = $request->input('user_id');
 
@@ -72,6 +73,42 @@ class AdminController extends Controller
         }
     }
 
+    public function banUnbanBlog(Request $request)
+    {
+        $blogId = $request->input('blog_id');
+
+        $blog = Blog::find($blogId);
+
+        if (!$blog) {
+            return response()->json(['status' => 'error', 'message' => 'blog not found']);
+        }
+
+
+        if ($blog->ban) {
+
+            $blog->ban = false;
+            $blog->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'unbanned',
+                'blogId' => $blog->id,
+                'blogStatus' => 'Active'
+            ]);
+        } else {
+
+            $blog->ban = true;
+            $blog->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'banned',
+                'blogId' => $blog->id,
+                'blogStatus' => 'Banned'
+            ]);
+        }
+    }
+
     public function conversation($id){
         try{
 
@@ -79,6 +116,36 @@ class AdminController extends Controller
             return view('admin.users.blog', compact('blog'));
         }catch(Exception $e){
             return redirect()->back()->with('error', 'Something Went Wrong!');
+        }
+    }
+
+    public function deleteComment(Request $request){
+
+        $validated = $request->validate([
+            'id' => 'required|string'
+        ]);
+
+        try {
+            $comment = Comment::find(decrypt($request->id));
+
+            if ($comment) {
+                $comment->delete();
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Comment Deleted Successfully',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Comment Not Found',
+                ], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something Went Wrong: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
