@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class IndexController extends Controller
 {
     public function index(){
-        $blogs = Blog::paginate(10);
+        $blogs = Blog::latest()->paginate(10);
         return view('index', compact('blogs'));
     }
 

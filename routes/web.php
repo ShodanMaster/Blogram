@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
@@ -44,5 +45,11 @@ ROute::middleware('auth')->group(function(){
 
         Route::post('like-blog', [BlogController::class, 'likeBlog'])->name('likeblog');
 
+    });
+
+    Route::prefix('conversation')->name('conversation.')->group(function(){
+        Route::get('/{id}', [CommentController::class, 'conversation'])->name('converstaions');
+        Route::post('store-comment', [CommentController::class, 'storeComment'])->name('storecomment');
+        Route::post('delete-comment', [CommentController::class, 'deleteComment'])->name('deletecomment');
     });
 });

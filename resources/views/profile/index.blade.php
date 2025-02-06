@@ -177,6 +177,17 @@
                 <div class="user">
 
                 </div>
+                <div class="conversation">
+                    <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations |
+                        <p class="text-secondart">
+                            @if (count($blog->comments)>99)
+                                99+
+                            @else
+                                {{count($blog->comments)}}
+                            @endif
+                        </p>
+                    </a>
+                </div>
                 <div class="like">
                     <button type="button" class="btn btn-primary" id="likeButton" value="{{ encrypt($blog->id) }}">
                         @if(auth()->check() && auth()->user()->likedBlogs()->where('blog_id', $blog->id)->exists())

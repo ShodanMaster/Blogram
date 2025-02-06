@@ -55,7 +55,6 @@
                                 Edit2</a>
                             </li>
                         @endif
-                        <li><a class="dropdown-item" href="#">Menu item 3</a></li>
                     </ul>
                 </div>
 
@@ -76,6 +75,18 @@
                             class="rounded-circle" width="40" height="40">
                     @endif
                     <span class="ms-2 text-white">{{ $blog->user->name }}</span>
+                </div>
+                <div class="conversation">
+                    <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations                        <span class="text-secondart">
+                            @if (count($blog->comments)>99)
+                            |99+
+                            @elseif (count($blog->comments)<1)
+
+                            @else
+                            |{{count($blog->comments)}}
+                            @endif
+                        </span>
+                    </a>
                 </div>
                 <div class="like">
                     <button type="button" class="btn btn-primary" id="likeButton" value="{{ encrypt($blog->id) }}">

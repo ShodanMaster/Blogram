@@ -16,6 +16,7 @@ class BlogController extends Controller
             'title' => 'required|string|max:150',
             'content' => 'required|string'
         ]);
+
         try{
             Blog::create([
                 'user_id' => Auth::user()->id,

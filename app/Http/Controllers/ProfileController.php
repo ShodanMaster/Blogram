@@ -17,8 +17,8 @@ class ProfileController extends Controller
 
     }
 
-    public function updateProfile(Request $request){
-
+    public function updateProfile(Request $request)
+    {
         $validated = $request->validate([
             'gender' => 'required|in:Male,Female,Other',
             'bio' => 'nullable|string|max:500',
@@ -26,48 +26,32 @@ class ProfileController extends Controller
         ]);
 
         try {
-            // Handle profile image upload if present
+
+            $profileData = [
+                'gender' => $request->gender,
+                'bio' => $request->bio,
+            ];
+
             if ($request->hasFile('profile_image')) {
                 $image = $request->file('profile_image');
                 $imageName = 'profile_image_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $imagePath = $image->storeAs('profile_images', $imageName, 'public');
 
-                // Delete old profile image if exists
                 $this->deleteOldProfileImage();
 
-                // Update the user's profile with new image
-                if(Auth::user()->profile()){
+                $profileData['profile_image'] = $imagePath;
+            } elseif ($request->input('removeProfileImage')) {
 
-                    Auth::user()->profile()->update([
-                        'gender' => $request->gender,
-                        'bio' => $request->bio,
-                        'profile_image' => $imagePath,
-                    ]);
-                }else{
-                    Auth::user()->profile()->create([
-                        'gender' => $request->gender,
-                        'bio' => $request->bio,
-                        'profile_image' => $imagePath,
-                    ]);
-                }
+                $this->deleteOldProfileImage();
 
-            } else {
-                // Handle profile image removal if requested
-                if ($request->input('removeProfileImage')) {
-                    $this->deleteOldProfileImage();
-
-                    // Update profile without an image
-                    Auth::user()->profile()->update([
-                        'profile_image' => null,
-                    ]);
-                }
-
-                // Update profile with gender and bio
-                Auth::user()->profile()->updateOrCreate([
-                    'gender' => $request->gender,
-                    'bio' => $request->bio,
-                ]);
+                $profileData['profile_image'] = null;
             }
+
+            $user = Auth::user();
+            $user->profile()->updateOrCreate(
+                ['user_id' => $user->id],
+                $profileData
+            );
 
             return response()->json([
                 'status' => 200,
@@ -80,6 +64,7 @@ class ProfileController extends Controller
             ], 500);
         }
     }
+
     private function deleteOldProfileImage(){
 
         $userProfile = Auth::user()->profile;
