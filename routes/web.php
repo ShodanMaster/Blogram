@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\IndexController;
@@ -25,7 +26,7 @@ Route::post('register-user', [LoginController::class, 'registerUser'])->name('re
 Route::get('auth/google',[LoginController::class, 'googlePage'])->name('auth.google');
 Route::get('auth/google/callback',[LoginController::class, 'googleCallBack'])->name('auth.google.callback');
 
-ROute::middleware('auth')->group(function(){
+Route::middleware('checkuser')->group(function(){
     Route::get('/',[IndexController::class, 'index'])->name('index');
     Route::get('/load-more-blogs', [IndexController::class, 'loadMoreBlogs'])->name('loadMoreBlogs');
 
@@ -56,3 +57,16 @@ ROute::middleware('auth')->group(function(){
         Route::post('delete-comment', [CommentController::class, 'deleteComment'])->name('deletecomment');
     });
 });
+
+Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function() {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+
+    Route::get('users', [AdminController::class, 'users'])->name('users');
+    Route::post('/user/ban-unban', [AdminController::class, 'banUnban'])->name('banunban');
+
+});
+
+
+Route::get('restricted', function(){
+    return view('restricted');
+})->name('restricted');
