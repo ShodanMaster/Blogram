@@ -16,7 +16,7 @@
             @forelse ($users as $user)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $user->name }}</td>
+                    <td><a href="{{route('admin.userprofile', encrypt($user->id))}}">{{ $user->name }}</a></td>
                     <td>{{ $user->email }}</td>
                     <td>
                         @if($user->google_id)

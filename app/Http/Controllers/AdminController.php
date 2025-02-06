@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Blog;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -49,6 +51,34 @@ class AdminController extends Controller
                 'userId' => $user->id,
                 'userStatus' => 'Banned'
             ]);
+        }
+    }
+
+    public function userProfile($id){
+        // dd($id);
+        try{
+            $user = User::find(decrypt($id));
+
+            if($user){
+
+                return view('admin.users.userprofile', compact('user'));
+            }
+            else{
+                return redirect()->back()->with('error', 'User Not Found');
+            }
+
+        }catch(Exception $e){
+            return redirect()->back()->with('error', 'Something Went Wrong! '. $e->getMessage());
+        }
+    }
+
+    public function conversation($id){
+        try{
+
+            $blog = Blog::findOrFail(decrypt($id));
+            return view('admin.users.blog', compact('blog'));
+        }catch(Exception $e){
+            return redirect()->back()->with('error', 'Something Went Wrong!');
         }
     }
 
