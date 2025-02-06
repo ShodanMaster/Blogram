@@ -36,6 +36,9 @@ ROute::middleware('auth')->group(function(){
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('', [ProfileController::class, 'index'])->name('index');
         Route::post('update-profile', [ProfileController::class, 'updateProfile'])->name('updateprofile');
+
+        Route::get('user-profile/{id}', [ProfileController::class, 'userProfile'])->name('userprofile');
+
     });
 
     Route::prefix('blog')->name('blog.')->group(function () {

@@ -59,17 +59,19 @@
         {!! $blog->content !!}
     </div>
     <div class="card-footer d-flex justify-content-between align-items-center">
-        <div class="user d-flex align-items-center">
-            @if($blog->user->profile && $blog->user->profile->profile_image)
-                <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
-            @else
-                <img src="{{ asset('defaults/default_profile.jpeg') }}"
-                    alt="No profile photo"
-                    title="No profile photo"
-                    class="rounded-circle" width="40" height="40">
-            @endif
-            <span class="ms-2 text-white">{{ $blog->user->name }}</span>
-        </div>
+        <a href="{{route('profile.userprofile', encrypt($blog->user->id))}}" class="text-decoration-none">
+            <div class="user d-flex align-items-center">
+                @if($blog->user->profile && $blog->user->profile->profile_image)
+                    <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
+                @else
+                    <img src="{{ asset('defaults/default_profile.jpeg') }}"
+                        alt="No profile photo"
+                        title="No profile photo"
+                        class="rounded-circle" width="40" height="40">
+                @endif
+                <span class="ms-2 text-white">{{ $blog->user->name }}</span>
+            </div>
+        </a>
         <div class="like">
             <button type="button" class="btn btn-primary" id="likeButton" value="{{ encrypt($blog->id) }}">
                 @if(auth()->check() && auth()->user()->likedBlogs()->where('blog_id', $blog->id)->exists())
@@ -113,16 +115,17 @@
                 <div class="d-flex align-items-center">
                     <!-- User Profile Image and Name -->
                     @if($comment->user) <!-- If the comment is from a logged-in user -->
-                        @if($comment->user->profile && $comment->user->profile->profile_image)
-                            <img src="{{ asset('storage/' . $comment->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle border border-light" width="40" height="40">
-                        @else
-                            <img src="{{ asset('defaults/default_profile.jpeg') }}" alt="No profile photo" class="rounded-circle border border-light" width="40" height="40">
-                        @endif
-                        <span class="ms-3 text-white fw-bold">{{ $comment->user->name }}</span>
-                        <p class="text-secondary mt-2 small">{{ $comment->created_at->diffForHumans() }}</p>
-
+                        <a href="{{route('profile.userprofile', encrypt($comment->user->id))}}" class="text-decoration-none">
+                            @if($comment->user->profile && $comment->user->profile->profile_image)
+                                <img src="{{ asset('storage/' . $comment->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle border border-light" width="40" height="40">
+                            @else
+                                <img src="{{ asset('defaults/default_profile.jpeg') }}" alt="No profile photo" class="rounded-circle border border-light" width="40" height="40">
+                            @endif
+                            <span class="ms-3 text-white fw-bold">{{ $comment->user->name }}</span>
+                            <p class="text-secondary mt-2 small">{{ $comment->created_at->diffForHumans() }}</p>
+                        </a>
                     @else <!-- If the comment is from a guest -->
-                        <span class="ms-3 text-white fw-bold">{{ $comment->author_name }}</span>
+                        <span class="ms-3 text-white fw-bold">No User</span>
                     @endif
                 </div>
 

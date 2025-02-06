@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,6 @@ class ProfileController extends Controller
         $blogs = Blog::where('user_id', Auth::user()->id)->latest()->paginate(10);
         // dd($blogs->toArray());
         return view('profile.index', compact('blogs'));
-
     }
 
     public function updateProfile(Request $request)
@@ -79,5 +79,25 @@ class ProfileController extends Controller
         }
     }
 
+    public function userProfile($id){
+        // dd($id);
+        try{
+            $user = User::find(decrypt($id));
+
+            if($user){
+                if(Auth::user() == $user){
+                    return redirect()->route('profile.index');
+                }else{
+                    return view('profile.userprofile', compact('user'));
+                }
+            }
+            else{
+                return redirect()->back()->with('error', 'User Not Found');
+            }
+
+        }catch(Exception $e){
+            return redirect()->back()->with('error', 'Something Went Wrong! '. $e->getMessage());
+        }
+    }
 
 }

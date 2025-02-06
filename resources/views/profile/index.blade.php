@@ -165,7 +165,6 @@
                                 Edit2</a>
                             </li>
                         @endif
-                        <li><a class="dropdown-item" href="#">Menu item 3</a></li>
                     </ul>
                 </div>
 
@@ -178,14 +177,14 @@
 
                 </div>
                 <div class="conversation">
-                    <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations |
-                        <p class="text-secondart">
+                    <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations
+                        <span class="text-secondart">
                             @if (count($blog->comments)>99)
-                                99+
+                                |99+
                             @else
-                                {{count($blog->comments)}}
+                                |{{count($blog->comments)}}
                             @endif
-                        </p>
+                        </span>
                     </a>
                 </div>
                 <div class="like">

@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<h1>Index</h1>
+<h1>Blogram</h1>
 <div id="blog-container">
     @forelse ($blogs as $blog)
         <div class="card bg-dark mb-3">
@@ -63,21 +63,24 @@
                 {!! $blog->content !!}
             </div>
             <div class="card-footer d-flex justify-content-between align-items-center">
-                <div class="user d-flex align-items-center">
-                    @if($blog->user->profile && $blog->user->profile->profile_image)
-                    {{-- <p class="text-white">{{$blog->user->profile->profile_image}}</p> --}}
-                        <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
+                <a href="{{route('profile.userprofile', encrypt($blog->user->id))}}" class="text-decoration-none">
+                    <div class="user d-flex align-items-center">
+                        @if($blog->user->profile && $blog->user->profile->profile_image)
+                        {{-- <p class="text-white">{{$blog->user->profile->profile_image}}</p> --}}
+                            <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
 
-                    @else
-                        <img src="{{ asset('defaults/default_profile.jpeg') }}"
-                            alt="No profile photo"
-                            title="No profile photo"
-                            class="rounded-circle" width="40" height="40">
-                    @endif
-                    <span class="ms-2 text-white">{{ $blog->user->name }}</span>
-                </div>
+                        @else
+                            <img src="{{ asset('defaults/default_profile.jpeg') }}"
+                                alt="No profile photo"
+                                title="No profile photo"
+                                class="rounded-circle" width="40" height="40">
+                        @endif
+                        <span class="ms-2 text-white">{{ $blog->user->name }}</span>
+                    </div>
+                </a>
                 <div class="conversation">
-                    <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations                        <span class="text-secondart">
+                    <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations
+                        <span class="text-secondary">
                             @if (count($blog->comments)>99)
                             |99+
                             @elseif (count($blog->comments)<1)
