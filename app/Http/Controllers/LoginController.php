@@ -18,7 +18,7 @@ class LoginController extends Controller
     }
 
     public function LoggingIn(Request $request){
-
+        // dd($request->all());
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -30,7 +30,9 @@ class LoginController extends Controller
                 'password' => $request->password,
             ];
 
-            if (auth()->attempt($credentials)) {
+            $rememberMe = $request->has('rememberMe');
+
+            if (auth()->attempt($credentials, $rememberMe)) {
                 return redirect()->route('index')->with('success', 'Logged In');
             } else {
                 return redirect()->back()->withInput()->with('error', 'Invalid credentials.');

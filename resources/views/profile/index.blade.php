@@ -175,10 +175,19 @@
             </div>
             <div class="card-footer d-flex justify-content-between">
                 <div class="user">
-                    
+
                 </div>
                 <div class="like">
-                    <button type="button" class="btn btn-primary">Like</button>
+                    <button type="button" class="btn btn-primary" id="likeButton" value="{{ encrypt($blog->id) }}">
+                        @if(auth()->check() && auth()->user()->likedBlogs()->where('blog_id', $blog->id)->exists())
+                            Unlike
+                        @else
+                            Like
+                        @endif
+                    </button>
+                    <span id="likeCount{{ $blog->id }}" class="text-white">
+                        {{ $blog->likedUsers()->count() }} Likes
+                    </span>
                 </div>
             </div>
         </div>
@@ -593,6 +602,43 @@
                                 });
                             }
                         });
+                    }
+                });
+            });
+
+            $(document).on('click', '#likeButton', function (e) {
+                e.preventDefault();  // Prevent the default action
+
+                var blogId = $(this).val();  // Get the blog ID from the button value
+                var button = $(this);  // The like/unlike button
+                var likeCountElement;  // The like count span for this blog
+
+                $.ajax({
+                    url: "{{ route('blog.likeblog') }}",  // Your route for liking the blog
+                    method: 'POST',
+                    data: {
+                        blog_id: blogId,
+                        _token: '{{ csrf_token() }}',  // CSRF token for security
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Toggle the button text based on the response
+                            if (response.message === 'added') {
+                                button.text('Unlike');  // Change button text to 'Unlike'
+                            } else {
+                                button.text('Like');  // Change button text back to 'Like'
+                            }
+
+                            // Update the like count on the UI
+                            likeCountElement = $('#likeCount' + response.blogId);
+                            likeCountElement.text(response.likeCount + ' Likes');  // Set the new like count
+                        } else {
+                            alert('Something went wrong. Please try again.');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('There was an error. Please try again later.');
                     }
                 });
             });

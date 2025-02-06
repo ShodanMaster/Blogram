@@ -7,11 +7,11 @@
         </div>
 
         <!-- Login Form -->
-        <form action="{{route('loggingin')}}" method="POST" id="login-form">
+        <form action="{{ route('loggingin') }}" method="POST" id="login-form">
             @csrf
             <div class="card-body">
                 <div class="form-group mb-3">
-                    <input type="text" class="form-control" name="email" id="email" placeholder="Email" value="{{old('email')}}" required>
+                    <input type="text" class="form-control" name="email" id="email" placeholder="Email" value="{{ old('email') }}" required>
                 </div>
                 <div class="form-group mb-3">
                     <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
@@ -28,9 +28,17 @@
                 </div>
             </div>
             <div class="card-footer d-flex justify-content-between">
-                <a href="{{route('auth.google')}}">Login with Google</a>  <button class="btn btn-primary">Login</button>
+                <a href="{{ route('auth.google') }}">Login with Google</a>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe" />
+                    <label class="form-check-label text-white" for="rememberMe">Remember me</label>
+                </div>
+
+                <button class="btn btn-primary">Login</button>
             </div>
         </form>
+
 
         <!-- Signup Form -->
         <form id="signup-form" style="display: none;">
