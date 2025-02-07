@@ -56,6 +56,8 @@ Route::middleware('checkuser')->group(function(){
         Route::post('store-comment', [CommentController::class, 'storeComment'])->name('storecomment');
         Route::post('delete-comment', [CommentController::class, 'deleteComment'])->name('deletecomment');
     });
+
+    Route::post('report', [IndexController::class, 'report'])->name('report');
 });
 
 Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function() {

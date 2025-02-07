@@ -2,6 +2,34 @@
 
 @section('content')
 
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary">
+                <h1 class="modal-title fs-5" id="reportModalLabel">Report</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reportForm">
+                <input type="hidden" name="userId" id="reportUserId">
+                <input type="hidden" name="blogId" id="reportBlogId">
+                <input type="hidden" name="commentId" id="reportCommentId">
+
+                <div class="modal-body bg-dark">
+                    <div class="form-group">
+                        <label for="reason" class="form-label">Reason: </label>
+                        <input type="text" class="form-control" name="reason" id="reason" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Modal -->
 <div class="modal fade" id="editBlogModal" tabindex="-1" aria-labelledby="editBlogModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -52,6 +80,8 @@
                         Edit</a>
                     </li>
                 @endif
+                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
+                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
             </ul>
         </div>
     </div>
@@ -145,6 +175,7 @@
                         @if((Auth::check() && Auth::id() == $blog->user_id) || Auth::check() && Auth::id() == $comment->user_id)
                             <li><a class="dropdown-item" href="#" id="deleteComment" data-id="{{ encrypt($comment->id) }}">Delete Comment</a></li>
                         @endif
+                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-commentid="{{ encrypt($comment->id) }}">Report Comment</a></li>
                     </ul>
                 </div>
             </div>
@@ -452,5 +483,94 @@
             }
         });
     });
+
+    $('#reportModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+
+        // Retrieve data attributes from the clicked button
+        var blogId = button.data('blogid');
+        var userId = button.data('userid');
+        var commentId = button.data('commentid');
+
+        console.log('Blog ID:', blogId);
+        console.log('User ID:', userId);
+        console.log('Comment ID:', commentId);
+
+
+        // Reset form fields before populating
+        $('#reportUserId').val('');
+        $('#reportBlogId').val('');
+        $('#reportCommentId').val('');
+        $('#reason').val('');
+
+        // Pass the data to the modal form fields
+        var modal = $(this);
+
+        if (userId) {
+            modal.find('#reportUserId').val(userId);
+        }
+
+        if (blogId) {
+            modal.find('#reportBlogId').val(blogId);
+        }
+
+        if (commentId) {
+            modal.find('#reportCommentId').val(commentId);
+        }
+    });
+
+
+    $(document).on('submit', '#reportForm', function (e) {
+        e.preventDefault();  // Prevent default form submission
+
+        // Collect the form data
+        var formData = {
+            userId: $('#reportUserId').val(),
+            blogId: $('#reportBlogId').val(),
+            commentId: $('#reportCommentId').val(),
+            reason: $('#reason').val(),
+            reportableType: $('#reportableType').val(),
+            _token: '{{ csrf_token() }}'  // CSRF token for security
+        };
+
+        // Log the collected data for debugging (optional)
+        console.log(formData);
+
+        // Send the data via AJAX
+        $.ajax({
+            url: "{{ route('report') }}",  // Make sure the route is correct
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.status === 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Reported',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    }).then(function() {
+                        location.reload(); // Reload page or update the UI
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            },
+
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+
 </script>
 @endsection

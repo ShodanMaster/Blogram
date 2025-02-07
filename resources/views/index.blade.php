@@ -2,7 +2,35 @@
 
 @section('content')
 
-<!-- Modal -->
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary">
+                <h1 class="modal-title fs-5" id="reportModalLabel">Report</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reportForm">
+                <input type="hidden" name="userId" id="reportUserId">
+                <input type="hidden" name="blogId" id="reportBlogId">
+                <input type="hidden" name="commentId" id="reportCommentId">
+
+                <div class="modal-body bg-dark">
+                    <div class="form-group">
+                        <label for="reason" class="form-label">Reason: </label>
+                        <input type="text" class="form-control" name="reason" id="reason" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Blog Modal -->
 <div class="modal fade" id="editBlogModal" tabindex="-1" aria-labelledby="editBlogModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -55,6 +83,7 @@
                                 Edit2</a>
                             </li>
                         @endif
+                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogId="{{ encrypt($blog->id) }}" >Report Blog</a></li>
                     </ul>
                 </div>
 
@@ -190,8 +219,6 @@
     $(document).on('submit', '#editBlog',function (e) {
         e.preventDefault();
 
-        console.log('Inside');
-
         var formData = new FormData(this);
 
         $.ajaxSetup({
@@ -307,6 +334,51 @@
             error: function(xhr, status, error) {
                 console.error('Error:', error);
                 alert('There was an error. Please try again later.');
+            }
+        });
+    });
+
+    $('#reportModal').on('show.bs.modal', function (event) {
+        // Get the data attributes passed with the link
+        var button = $(event.relatedTarget);  // Button that triggered the modal
+        var blogId = button.data('blogid');   // Get the blogId from the data-blogId attribute
+        var userId = button.data('userid');   // Get the userId from the data-userId attribute
+        var commentId = button.data('commentid');  // Get the commentId from the data-commentId attribute
+
+        // Populate the modal's hidden fields
+        var modal = $(this);
+        modal.find('#reportBlogId').val(blogId);
+        modal.find('#reportUserId').val(userId);
+        modal.find('#reportCommentId').val(commentId);
+    });
+
+    // Handle the form submission
+    $(document).on('submit', '#reportForm', function (e) {
+        e.preventDefault();  // Prevent default form submission
+
+        // Collect the form data
+        var formData = {
+            userId: $('#reportUserId').val(),
+            blogId: $('#reportBlogId').val(),
+            commentId: $('#reportCommentId').val(),
+            reason: $('#reason').val(),
+            _token: '{{ csrf_token() }}'
+        };
+
+        // For testing, log the collected data
+        console.log(formData);
+
+        // You can now send the form data via AJAX, e.g.:
+        $.ajax({
+            url: "{{route('report')}}",  // Replace with your actual endpoint
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                console.log('Report submitted successfully:', response);
+                $('#reportModal').modal('hide');  // Close the modal
+            },
+            error: function(xhr, status, error) {
+                console.error('Error submitting the report:', error);
             }
         });
     });
