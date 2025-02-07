@@ -154,4 +154,9 @@ class AdminController extends Controller
         return view('admin.blogs.blogs', compact('blogs'));
     }
 
+    public function comments(){
+        $comments = Comment::all();
+        return view('admin.comments.comments', compact('comments'));
+    }
+
 }

@@ -28,31 +28,29 @@
 	<div class="wrapper">
 		<nav id="sidebar" class="sidebar js-sidebar">
 			<div class="sidebar-content js-simplebar">
-				<a class="sidebar-brand" href="index.html">
+				<a class="sidebar-brand" href="{{route('admin.index')}}">
                     <span class="align-middle">Blogram</span>
                 </a>
 
 				<ul class="sidebar-nav">
 
-					<li class="sidebar-item active">
+					<li class="sidebar-item {{ Route::is('admin.users') ? 'active' : '' }}">
 						<a class="sidebar-link" href="{{route('admin.users')}}">
                             <i class="align-middle" data-feather="user"></i> <span class="align-middle">Users</span>
                         </a>
 					</li>
 
-					<li class="sidebar-item">
+					<li class="sidebar-item {{ Route::is('admin.blogs') ? 'active' : '' }}">
 						<a class="sidebar-link" href="{{route('admin.blogs')}}">
                             <i class="align-middle" data-feather="edit"></i> <span class="align-middle">Blogs</span>
                         </a>
 					</li>
 
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="pages-sign-in.html">
+					<li class="sidebar-item {{ Route::is('admin.comments') ? 'active' : '' }}">
+						<a class="sidebar-link" href="{{route('admin.comments')}}">
                             <i class="align-middle" data-feather="list"></i> <span class="align-middle">Comments</span>
                         </a>
 					</li>
-
-
 				</ul>
 			</div>
 		</nav>

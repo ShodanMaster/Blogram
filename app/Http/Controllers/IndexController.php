@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class IndexController extends Controller
 {
     public function index(){
-        $blogs = Blog::latest()->paginate(10);
+        $blogs = Blog::where('ban', false)->latest()->paginate(10);
         return view('index', compact('blogs'));
     }
 
@@ -22,6 +22,10 @@ class IndexController extends Controller
             'blogs' => view('partials.index', compact('blogs'))->render(),
             'next_page' => $blogs->nextPageUrl()
         ]);
+    }
+
+    public function report(Request $request){
+        dd($request->all());
     }
 
 }

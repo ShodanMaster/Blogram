@@ -45,6 +45,17 @@
             </div>
         </div>
     </div>
+    <div class="card-footer d-flex justify-content-end">
+        <div class="user-card">
+            <span id="userStatus{{ $user->id }}" class="badge {{ $user->ban ? 'bg-danger' : 'bg-success' }}">
+                {{ $user->ban ? 'Banned' : 'Active' }}
+            </span>
+
+            <button type="button" class="btn btn-{{ $user->ban ? 'success' : 'danger' }}" id="userBanButton" value="{{ $user->id }}">
+                {{ $user->ban ? 'Unban' : 'Ban' }}
+            </button>
+        </div>
+    </div>
 </div>
 
 <h3>{{$user->name}}'s Blogs</h3>
@@ -103,7 +114,7 @@
                         {{ $blog->ban ? 'Banned' : 'Active' }}
                     </span>
 
-                    <button type="button" class="btn btn-{{ $blog->ban ? 'success' : 'danger' }}" id="banButton" value="{{ $blog->id }}">
+                    <button type="button" class="btn btn-{{ $blog->ban ? 'success' : 'danger' }}" id="banBlogButton" value="{{ $blog->id }}">
                         {{ $blog->ban ? 'Unban' : 'Ban' }}
                     </button>
                 </div>
@@ -126,7 +137,7 @@
 @endsection
 @section('scripts')
     <script>
-        $(document).on('click', '#banButton', function (e) {
+        $(document).on('click', '#banBlogButton', function (e) {
             e.preventDefault();
 
             var blogId = $(this).val();
@@ -150,6 +161,41 @@
 
                         statusTextElement = $('#blogStatus' + response.blogId);
                         statusTextElement.text(response.blogStatus);
+                    } else {
+                        alert('Something went wrong. Please try again.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('There was an error. Please try again later.');
+                }
+            });
+        });
+
+        $(document).on('click', '#userBanButton', function (e) {
+            e.preventDefault();
+
+            var userId = $(this).val();
+            var button = $(this);
+            var statusTextElement;
+
+            $.ajax({
+                url: "{{ route('admin.banunbanuser') }}",
+                method: 'POST',
+                data: {
+                    user_id: userId,
+                    _token: '{{ csrf_token() }}',
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (response.message === 'banned') {
+                            button.text('Unban');
+                        } else {
+                            button.text('Ban');
+                        }
+
+                        statusTextElement = $('#userStatus' + response.userId);
+                        statusTextElement.text(response.userStatus);
                     } else {
                         alert('Something went wrong. Please try again.');
                     }

@@ -144,7 +144,7 @@
 <h3>Your Blogs</h3>
 <div id="blog-container">
     @forelse ($blogs as $blog)
-        <div class="card bg-dark mb-3">
+        <div class="card {{$blog->ban ? 'bg-danger' : 'bg-dark' }} mb-3">
             <div class="card-header bg-secondary text-white fs-4 d-flex justify-content-between">
                 {{ $blog->title }}
 

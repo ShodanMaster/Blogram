@@ -56,4 +56,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Blog::class)->withTimestamps();
     }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+    
 }

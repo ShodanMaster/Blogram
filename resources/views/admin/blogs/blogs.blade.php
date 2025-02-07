@@ -18,17 +18,24 @@
                             </button>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content center">
-                        <div class="conversation">
-                            <a href="{{route('admin.converstaions', encrypt($blog->id))}}">see conversations
-                                <span class="text-secondart">
-                                    @if (count($blog->comments)>99)
-                                        |99+
-                                    @else
-                                        |{{count($blog->comments)}}
-                                    @endif
-                                </span>
-                            </a>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <a href="{{route('admin.userprofile', encrypt($blog->user->id))}}" class="text-decoration-none">
+                            <div class="user d-flex align-items-center">
+                                @if($blog->user->profile && $blog->user->profile->profile_image)
+                                    <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
+                                @else
+                                    <img src="{{ asset('defaults/default_profile.jpeg') }}"
+                                        alt="No profile photo"
+                                        title="No profile photo"
+                                        class="rounded-circle" width="40" height="40">
+                                @endif
+                                <span class="ms-2">{{ $blog->user->name }}</span>
+                            </div>
+                        </a>
+                        <div class="like">
+                            <span id="likeCount{{ $blog->id }}">
+                                {{ $blog->likedUsers()->count() }} Likes
+                            </span>
                         </div>
                     </div>
                 </div>

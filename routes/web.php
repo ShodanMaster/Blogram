@@ -66,6 +66,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::post('/user/ban-unban', [AdminController::class, 'banUnbanUser'])->name('banunbanuser');
     Route::post('/blog/ban-unban', [AdminController::class, 'banUnbanBlog'])->name('banunbanblog');
     Route::get('/conversation/{id}', [AdminController::class, 'conversation'])->name('converstaions');
+    Route::get('comments', [AdminController::class, 'comments'])->name('comments');
     Route::post('delete-comment', [AdminController::class, 'deleteComment'])->name('deletecomment');
 
 

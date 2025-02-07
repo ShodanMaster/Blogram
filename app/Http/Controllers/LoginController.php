@@ -99,7 +99,7 @@ class LoginController extends Controller
 
             {
 
-                Auth::login($finduser);
+                Auth::login($finduser, true);
 
                 return redirect()->intended('');
 
@@ -115,7 +115,7 @@ class LoginController extends Controller
                     'password' => encrypt('123456dummy')
                 ]);
 
-                Auth::login($newUser);
+                Auth::login($newUser, true);
 
                 return redirect()->intended('');
             }

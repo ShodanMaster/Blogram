@@ -50,6 +50,7 @@
 <h3>{{$user->name}}'s Blogs</h3>
 <div id="blog-container">
     @forelse ($user->blogs as $blog)
+    @if (!$blog->ban)
         <div class="card bg-dark mb-3">
             <div class="card-header bg-secondary text-white fs-4 d-flex justify-content-between">
                 {{ $blog->title }}
@@ -107,6 +108,7 @@
                 </div>
             </div>
         </div>
+    @endif
     @empty
         <p class="text-center text-white">NoData</p>
     @endforelse
