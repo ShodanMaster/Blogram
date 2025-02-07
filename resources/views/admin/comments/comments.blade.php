@@ -14,6 +14,7 @@
         </thead>
         <tbody>
             @forelse ($comments as $comment)
+            @if ($comment->blog)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{$comment->comment}}</td>
@@ -25,6 +26,7 @@
                         </button>
                     </td>
                 </tr>
+            @endif
             @empty
                 <tr>
                     <td colspan="5" class="text-center">No comments found.</td>

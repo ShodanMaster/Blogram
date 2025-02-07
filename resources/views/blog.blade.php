@@ -79,9 +79,10 @@
                         >
                         Edit</a>
                     </li>
-                @endif
+                @else
                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
+                @endif
             </ul>
         </div>
     </div>
@@ -174,8 +175,9 @@
                     <ul class="dropdown-menu">
                         @if((Auth::check() && Auth::id() == $blog->user_id) || Auth::check() && Auth::id() == $comment->user_id)
                             <li><a class="dropdown-item" href="#" id="deleteComment" data-id="{{ encrypt($comment->id) }}">Delete Comment</a></li>
-                        @endif
+                        @else
                         <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-commentid="{{ encrypt($comment->id) }}">Report Comment</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -337,7 +339,7 @@
                                 text: response.message,
                                 confirmButtonText: 'OK'
                             }).then(function() {
-                                location.reload();
+                                window.location.href = response.url;
                             });
                         } else if (response.status == 404) {
                             Swal.fire({
@@ -492,11 +494,6 @@
         var userId = button.data('userid');
         var commentId = button.data('commentid');
 
-        console.log('Blog ID:', blogId);
-        console.log('User ID:', userId);
-        console.log('Comment ID:', commentId);
-
-
         // Reset form fields before populating
         $('#reportUserId').val('');
         $('#reportBlogId').val('');
@@ -518,7 +515,6 @@
             modal.find('#reportCommentId').val(commentId);
         }
     });
-
 
     $(document).on('submit', '#reportForm', function (e) {
         e.preventDefault();  // Prevent default form submission

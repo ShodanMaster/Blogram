@@ -51,6 +51,12 @@
                             <i class="align-middle" data-feather="list"></i> <span class="align-middle">Comments</span>
                         </a>
 					</li>
+
+					<li class="sidebar-item {{ Route::is('admin.reports') ? 'active' : '' }}">
+						<a class="sidebar-link" href="{{route('admin.reports')}}">
+                            <i class="align-middle" data-feather="alert-triangle"></i> <span class="align-middle">Reports</span>
+                        </a>
+					</li>
 				</ul>
 			</div>
 		</nav>
@@ -179,6 +185,8 @@
             </footer>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.js" defer></script>
 
     <script src="{{asset('adminasset/js/app.js')}}"></script>
     <script src="{{asset('js/jquery-3.6.0.min.js')}}"></script>

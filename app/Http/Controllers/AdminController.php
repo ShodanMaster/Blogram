@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use App\Models\Comment;
+use App\Models\Report;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -158,5 +160,46 @@ class AdminController extends Controller
         $comments = Comment::all();
         return view('admin.comments.comments', compact('comments'));
     }
+
+    public function reports(){
+        $reports = Report::with('reportable')->latest()->get();
+        // dd($report);
+        return view('admin.reports.reports', compact('reports'));
+    }
+
+    public function handleReport($id){
+        $report = Report::find(decrypt($id));
+        return view('admin.reports.handlereport', compact('report'));
+    }
+
+    public function reportHandled(Request $request, Report $report){
+        try {
+
+            $modelClass = $report->reportable_type;
+            $modelId = $report->reportable_id;
+            $status = $request->status;
+
+            if (!in_array($modelClass, [Blog::class, User::class])) {
+                return redirect()->back()->with('error', 'Invalid reportable type');
+            }
+
+            $model = $modelClass::find($modelId);
+
+            if (!$model) {
+                return redirect()->back()->with('error', ucfirst(class_basename($modelClass)) . ' Not Found!');
+            }
+
+            $model->update(['ban' => true]);
+
+            $report->update(['status' => $status]);
+
+            return redirect()->back()->with('success', ucfirst(class_basename($modelClass)) . ' Banned!');
+        } catch (Exception $e) {
+
+            Log::error('Error handling report: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Something Went Wrong');
+        }
+    }
+
 
 }

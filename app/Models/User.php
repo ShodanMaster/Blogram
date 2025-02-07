@@ -21,7 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'google_id'
+        'google_id',
+        'ban'
     ];
 
     /**
@@ -61,5 +62,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Report::class);
     }
-    
+
 }

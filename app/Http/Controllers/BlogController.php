@@ -84,6 +84,7 @@ class BlogController extends Controller
                 return response()->json([
                     'status' => 200,
                     'message' => 'Blog Deleted Successfully',
+                    'url' => route('profile.index'),
                 ], 200);
             } else {
                 return response()->json([

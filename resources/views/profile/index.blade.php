@@ -162,7 +162,7 @@
                                 data-title = "{{$blog->title}}"
                                 data-content = "{{$blog->content}}"
                                 >
-                                Edit2</a>
+                                Edit</a>
                             </li>
                         @endif
                     </ul>

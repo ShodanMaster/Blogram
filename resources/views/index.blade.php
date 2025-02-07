@@ -80,10 +80,12 @@
                                 data-title = "{{$blog->title}}"
                                 data-content = "{{$blog->content}}"
                                 >
-                                Edit2</a>
+                                Edit</a>
                             </li>
+                        @else
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
                         @endif
-                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogId="{{ encrypt($blog->id) }}" >Report Blog</a></li>
                     </ul>
                 </div>
 
@@ -352,7 +354,6 @@
         modal.find('#reportCommentId').val(commentId);
     });
 
-    // Handle the form submission
     $(document).on('submit', '#reportForm', function (e) {
         e.preventDefault();  // Prevent default form submission
 
@@ -362,23 +363,45 @@
             blogId: $('#reportBlogId').val(),
             commentId: $('#reportCommentId').val(),
             reason: $('#reason').val(),
-            _token: '{{ csrf_token() }}'
+            reportableType: $('#reportableType').val(),
+            _token: '{{ csrf_token() }}'  // CSRF token for security
         };
 
-        // For testing, log the collected data
+        // Log the collected data for debugging (optional)
         console.log(formData);
 
-        // You can now send the form data via AJAX, e.g.:
+        // Send the data via AJAX
         $.ajax({
-            url: "{{route('report')}}",  // Replace with your actual endpoint
+            url: "{{ route('report') }}",  // Make sure the route is correct
             method: 'POST',
             data: formData,
             success: function(response) {
-                console.log('Report submitted successfully:', response);
-                $('#reportModal').modal('hide');  // Close the modal
+                if (response.status === 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Reported',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    }).then(function() {
+                        location.reload(); // Reload page or update the UI
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
             },
+
             error: function(xhr, status, error) {
-                console.error('Error submitting the report:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong. Please try again.',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });

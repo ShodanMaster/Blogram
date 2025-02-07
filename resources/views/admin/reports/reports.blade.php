@@ -1,37 +1,81 @@
 @extends('admin.layout')
 @section('content')
-    <h1>Comments</h1>
+    <h1>reports</h1>
 
     <table class="table table-striped table-hover">
         <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">comment</th>
-                <th scope="col">Commented By</th>
-                <th scope="col">blog</th>
+                <th scope="col">Reason</th>
+                <th scope="col">Reported By</th>
+                <th scope="col">Content Type</th>
+                <th scope="col">Content</th>
+                <th scope="col">status</th>
                 <th scope="col">Action</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($comments as $comment)
+            @forelse ($reports as $report)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{$comment->comment}}</td>
-                    <td><a href="{{route('admin.userprofile', encrypt($comment->user->id))}}">{{ $comment->user->name }}</a></td>
-                    <td><a href="{{route('admin.converstaions', encrypt($comment->blog->id))}}">see blog</a></td>
+                    <td>{{ $report->reason }}</td>
+                    <td><a href="{{ route('admin.userprofile', encrypt($report->user->id)) }}">{{ $report->user->name }}</a></td>
+                    <td>{{ class_basename($report->reportable_type) }}</td>
                     <td>
-                        <button type="button" class="btn btn-danger" id="deleteComment" data-id="{{ encrypt($comment->id) }}">
-                            Delete Comment
-                        </button>
+
+                        @if ($report->reportable_type === 'App\Models\Blog')
+                            <a href="{{ route('admin.converstaions', encrypt($report->reportable_id)) }}" target="_blank">
+                                {{ $report->reportable->title }}
+                            </a>
+                        @elseif ($report->reportable_type === 'App\Models\User')
+                            <a href="{{ route('admin.userprofile', encrypt($report->user_id)) }}" target="_blank">
+                                {{ $report->reportable->name }}
+                            </a>
+                        @elseif ($report->reportable_type === 'App\Models\Comment')
+
+                            @if ($report->reportable && !$report->reportable->comment)
+                                <span class="text-danger">Comment Was Removed</span>
+                            @elseif ($report->reportable)
+                                {{ Str::limit($report->reportable->comment, 50) }}
+                            @else
+                                <span class="text-danger">No content available</span>
+                            @endif
+
+                        @endif
+                    </td>
+                    <td>
+                        @if ($report->reportable_type === 'App\Models\Comment' && !$report->reportable)
+                            resolved
+                        @else
+                            {{$report->status}}
+                        @endif
+                    </td>
+                    <td>
+
+                        @if ($report->reportable_type === 'App\Models\Comment')
+                            @if ($report->reportable && !$report->reportable->comment)
+                                <button class="btn btn-success">Removed Comment</button>
+                            @elseif ($report->reportable)
+                                <button type="button" class="btn btn-danger" id="deleteComment" data-id="{{ encrypt($report->reportable_id) }}">
+                                    Delete comment
+                                </button>
+                            @else
+                                <span class="text-danger">Report Handled</span>
+                            @endif
+                        @else
+                            <a href="{{route('admin.handlereport', encrypt($report->id))}}"><button class="btn btn-warning">Handle Report</button></a>
+                        @endif
+
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">No comments found.</td>
+                    <td colspan="6" class="text-center">No reports found.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
+
 @endsection
 
 @section('scripts')

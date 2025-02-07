@@ -71,8 +71,11 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('comments', [AdminController::class, 'comments'])->name('comments');
     Route::post('delete-comment', [AdminController::class, 'deleteComment'])->name('deletecomment');
 
-
     Route::get('blogs', [AdminController::class, 'blogs'])->name('blogs');
+
+    Route::get('reports', [AdminController::class, 'reports'])->name('reports');
+    Route::get('handle-report/{id}', [AdminController::class, 'handleReport'])->name('handlereport');
+    Route::post('report-handled/{report}', [AdminController::class, 'reportHandled'])->name('reporthandled');
 
 });
 

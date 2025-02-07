@@ -1,5 +1,34 @@
 @extends('app.master')
 @section('content')
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary">
+                <h1 class="modal-title fs-5" id="reportModalLabel">Report</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reportForm">
+                <input type="hidden" name="userId" id="reportUserId">
+                <input type="hidden" name="blogId" id="reportBlogId">
+                <input type="hidden" name="commentId" id="reportCommentId">
+
+                <div class="modal-body bg-dark">
+                    <div class="form-group">
+                        <label for="reason" class="form-label">Reason: </label>
+                        <input type="text" class="form-control" name="reason" id="reason" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="card bg-dark text-white mb-3">
     <div class="card-body">
         <div class="row">
@@ -45,6 +74,10 @@
             </div>
         </div>
     </div>
+    <div class="card-footer d-flex justify-content-end">
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($user->id) }}">Report User</button>
+
+    </div>
 </div>
 
 <h3>{{$user->name}}'s Blogs</h3>
@@ -72,6 +105,7 @@
                                 Edit2</a>
                             </li>
                         @endif
+                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
                     </ul>
                 </div>
 
@@ -159,6 +193,72 @@
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
                     alert('There was an error. Please try again later.');
+                }
+            });
+        });
+
+        $('#reportModal').on('show.bs.modal', function (event) {
+            // Get the data attributes passed with the link
+            var button = $(event.relatedTarget);  // Button that triggered the modal
+            var blogId = button.data('blogid');   // Get the blogId from the data-blogId attribute
+            var userId = button.data('userid');   // Get the userId from the data-userId attribute
+            var commentId = button.data('commentid');  // Get the commentId from the data-commentId attribute
+
+            // Populate the modal's hidden fields
+            var modal = $(this);
+            modal.find('#reportBlogId').val(blogId);
+            modal.find('#reportUserId').val(userId);
+            modal.find('#reportCommentId').val(commentId);
+        });
+
+        $(document).on('submit', '#reportForm', function (e) {
+            e.preventDefault();  // Prevent default form submission
+
+            // Collect the form data
+            var formData = {
+                userId: $('#reportUserId').val(),
+                blogId: $('#reportBlogId').val(),
+                commentId: $('#reportCommentId').val(),
+                reason: $('#reason').val(),
+                reportableType: $('#reportableType').val(),
+                _token: '{{ csrf_token() }}'  // CSRF token for security
+            };
+
+            // Log the collected data for debugging (optional)
+            console.log(formData);
+
+            // Send the data via AJAX
+            $.ajax({
+                url: "{{ route('report') }}",  // Make sure the route is correct
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.status === 200) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reported',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        }).then(function() {
+                            location.reload(); // Reload page or update the UI
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });
