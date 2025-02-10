@@ -83,8 +83,8 @@
                                 Edit</a>
                             </li>
                         @else
-                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
-                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="blog" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="user" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
                         @endif
                     </ul>
                 </div>
@@ -354,56 +354,45 @@
         modal.find('#reportCommentId').val(commentId);
     });
 
-    $(document).on('submit', '#reportForm', function (e) {
-        e.preventDefault();  // Prevent default form submission
+    $('#reportModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
 
-        // Collect the form data
-        var formData = {
-            userId: $('#reportUserId').val(),
-            blogId: $('#reportBlogId').val(),
-            commentId: $('#reportCommentId').val(),
-            reason: $('#reason').val(),
-            reportableType: $('#reportableType').val(),
-            _token: '{{ csrf_token() }}'  // CSRF token for security
-        };
+        // Retrieve data attributes from the clicked button
+        var buttonName = button.data('name');
+        var blogId = button.data('blogid');
+        var userId = button.data('userid');
+        var commentId = button.data('commentid');
 
-        // Log the collected data for debugging (optional)
-        console.log(formData);
+        console.log(buttonName);
 
-        // Send the data via AJAX
-        $.ajax({
-            url: "{{ route('report') }}",  // Make sure the route is correct
-            method: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.status === 200) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Reported',
-                        text: response.message,
-                        confirmButtonText: 'OK'
-                    }).then(function() {
-                        location.reload(); // Reload page or update the UI
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message,
-                        confirmButtonText: 'OK'
-                    });
-                }
-            },
+        // Pass the data to the modal form fields
+        var modal = $(this);
 
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong. Please try again.',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
+        if(buttonName === 'blog'){
+            modal.find('#reportModalLabel').html('Report Blog');
+        }
+
+        if(buttonName === 'user'){
+            modal.find('#reportModalLabel').html('Report User');
+        }
+
+        // Reset form fields before populating
+        $('#reportUserId').val('');
+        $('#reportBlogId').val('');
+        $('#reportCommentId').val('');
+        $('#reason').val('');
+
+        if (userId) {
+            modal.find('#reportUserId').val(userId);
+        }
+
+        if (blogId) {
+            modal.find('#reportBlogId').val(blogId);
+        }
+
+        if (commentId) {
+            modal.find('#reportCommentId').val(commentId);
+        }
     });
 
 </script>

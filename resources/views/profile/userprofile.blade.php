@@ -75,7 +75,7 @@
         </div>
     </div>
     <div class="card-footer d-flex justify-content-end">
-        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($user->id) }}">Report User</button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="user" data-userid="{{ encrypt($user->id) }}">Report User</button>
 
     </div>
 </div>
@@ -105,7 +105,7 @@
                                 Edit2</a>
                             </li>
                         @endif
-                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
+                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="blog" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
                     </ul>
                 </div>
 
@@ -198,17 +198,44 @@
         });
 
         $('#reportModal').on('show.bs.modal', function (event) {
-            // Get the data attributes passed with the link
-            var button = $(event.relatedTarget);  // Button that triggered the modal
-            var blogId = button.data('blogid');   // Get the blogId from the data-blogId attribute
-            var userId = button.data('userid');   // Get the userId from the data-userId attribute
-            var commentId = button.data('commentid');  // Get the commentId from the data-commentId attribute
+            var button = $(event.relatedTarget); // Button that triggered the modal
 
-            // Populate the modal's hidden fields
+            // Retrieve data attributes from the clicked button
+            var buttonName = button.data('name');
+            var blogId = button.data('blogid');
+            var userId = button.data('userid');
+            var commentId = button.data('commentid');
+
+            console.log(buttonName);
+
+            // Pass the data to the modal form fields
             var modal = $(this);
-            modal.find('#reportBlogId').val(blogId);
-            modal.find('#reportUserId').val(userId);
-            modal.find('#reportCommentId').val(commentId);
+
+            if(buttonName === 'blog'){
+                modal.find('#reportModalLabel').html('Report Blog');
+            }
+
+            if(buttonName === 'user'){
+                modal.find('#reportModalLabel').html('Report User');
+            }
+
+            // Reset form fields before populating
+            $('#reportUserId').val('');
+            $('#reportBlogId').val('');
+            $('#reportCommentId').val('');
+            $('#reason').val('');
+
+            if (userId) {
+                modal.find('#reportUserId').val(userId);
+            }
+
+            if (blogId) {
+                modal.find('#reportBlogId').val(blogId);
+            }
+
+            if (commentId) {
+                modal.find('#reportCommentId').val(commentId);
+            }
         });
 
         $(document).on('submit', '#reportForm', function (e) {

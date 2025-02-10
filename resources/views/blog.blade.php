@@ -80,8 +80,8 @@
                         Edit</a>
                     </li>
                 @else
-                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
-                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
+                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="blog" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
+                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="user" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
                 @endif
             </ul>
         </div>
@@ -176,7 +176,7 @@
                         @if((Auth::check() && Auth::id() == $blog->user_id) || Auth::check() && Auth::id() == $comment->user_id)
                             <li><a class="dropdown-item" href="#" id="deleteComment" data-id="{{ encrypt($comment->id) }}">Delete Comment</a></li>
                         @else
-                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-commentid="{{ encrypt($comment->id) }}">Report Comment</a></li>
+                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="comment" data-commentid="{{ encrypt($comment->id) }}">Report Comment</a></li>
                         @endif
                     </ul>
                 </div>
@@ -490,18 +490,32 @@
         var button = $(event.relatedTarget); // Button that triggered the modal
 
         // Retrieve data attributes from the clicked button
+        var buttonName = button.data('name');
         var blogId = button.data('blogid');
         var userId = button.data('userid');
         var commentId = button.data('commentid');
 
+        console.log(buttonName);
+
+        // Pass the data to the modal form fields
+        var modal = $(this);
+
+        if(buttonName === 'blog'){
+            modal.find('#reportModalLabel').html('Report Blog');
+        }
+
+        if(buttonName === 'user'){
+            modal.find('#reportModalLabel').html('Report User');
+        }
+
+        if(buttonName === 'comment'){
+            modal.find('#reportModalLabel').html('Report Comment');
+        }
         // Reset form fields before populating
         $('#reportUserId').val('');
         $('#reportBlogId').val('');
         $('#reportCommentId').val('');
         $('#reason').val('');
-
-        // Pass the data to the modal form fields
-        var modal = $(this);
 
         if (userId) {
             modal.find('#reportUserId').val(userId);
