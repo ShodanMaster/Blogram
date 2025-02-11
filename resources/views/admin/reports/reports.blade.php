@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('content')
     <h1>reports</h1>
-
+    {{-- {{dd($dataTable)}} --}}
     <table class="table table-striped table-hover">
         <thead>
             <tr>
@@ -76,9 +76,11 @@
         </tbody>
     </table>
 
+    {{-- {{ $dataTable->table() }} --}}
 @endsection
 
 @section('scripts')
+{{-- {{ $dataTable->scripts(attributes: ['type' => 'module']) }} --}}
     <script>
         $(document).on('click', '#deleteComment', function (e) {
             e.preventDefault();

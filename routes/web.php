@@ -74,6 +74,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('blogs', [AdminController::class, 'blogs'])->name('blogs');
 
     Route::get('reports', [AdminController::class, 'reports'])->name('reports');
+    Route::get('get-reports', [AdminController::class, 'getReports'])->name('getreports');
+
     Route::get('handle-report/{id}', [AdminController::class, 'handleReport'])->name('handlereport');
     Route::post('report-handled/{report}', [AdminController::class, 'reportHandled'])->name('reporthandled');
 
@@ -83,3 +85,4 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 Route::get('restricted', function(){
     return view('restricted');
 })->name('restricted');
+

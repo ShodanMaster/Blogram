@@ -9,7 +9,6 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
 class AdminController extends Controller
 {
     public function index(){
@@ -161,11 +160,65 @@ class AdminController extends Controller
         return view('admin.comments.comments', compact('comments'));
     }
 
+    // public function reports(){
+    //     $reports = Report::with('reportable')->latest()->get();
+    //     // dd($report);
+    //     return view('admin.reports.reports', compact('reports'));
+    // }
+
     public function reports(){
         $reports = Report::with('reportable')->latest()->get();
-        // dd($report);
+
         return view('admin.reports.reports', compact('reports'));
     }
+
+//     public function getReports(Request $request)
+// {
+//     if ($request->ajax()) {
+//         // Start building the query for reports
+//         $reports = Report::with('reportable') // assuming reports have a polymorphic relation 'reportable'
+//                          ->latest(); // Order by the latest reports
+
+//         // Apply filters if provided in the request
+//         if ($request->has('status') && $request->status) {
+//             $reports->where('status', $request->status); // Filter by status
+//         }
+
+//         if ($request->has('category') && $request->category) {
+//             $reports->where('reportable_type', $request->category); // Filter by category (polymorphic entity type)
+//         }
+
+//         if ($request->has('date_from') && $request->has('date_to')) {
+//             $reports->whereBetween('created_at', [$request->date_from, $request->date_to]); // Filter by date range
+//         }
+
+//         // Select relevant columns (you can also limit to specific columns)
+//         $reports = $reports->select('*');
+
+//         // Return data for DataTables with additional columns for actions and checkboxes
+//         return DataTables::of($reports)
+//             ->addColumn('checkbox', function ($report) {
+//                 // Adds a checkbox for each report
+//                 return '<input type="checkbox" name="select[]" value="' . $report->id . '">';
+//             })
+//             ->addColumn('action', function ($report) {
+//                 // Add action buttons like view, delete, etc.
+//                 $detailsUrl = route('admin.reports.show', $report->id); // Route to view details
+//                 return '<a class="btn btn-info" href="' . $detailsUrl . '"><i class="fa fa-eye"></i> View</a>';
+//             })
+//             ->addColumn('reportable_name', function ($report) {
+//                 // Show the name of the related entity based on 'reportable_type'
+//                 return $report->reportable ? $report->reportable->name : 'N/A';
+//             })
+//             ->rawColumns(['checkbox', 'action']) // Ensure raw HTML is rendered in those columns
+//             ->addIndexColumn() // Adds a serial number column
+//             ->make(true); // Returns the data in the proper format for DataTables
+//     }
+
+//     return response()->json(['error' => 'Invalid request']); // If it's not an AJAX request
+// }
+
+
 
     public function handleReport($id){
         $report = Report::find(decrypt($id));
