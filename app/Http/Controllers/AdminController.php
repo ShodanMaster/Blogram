@@ -9,6 +9,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\DataTables;
 class AdminController extends Controller
 {
     public function index(){
@@ -160,64 +161,69 @@ class AdminController extends Controller
         return view('admin.comments.comments', compact('comments'));
     }
 
-    // public function reports(){
-    //     $reports = Report::with('reportable')->latest()->get();
-    //     // dd($report);
-    //     return view('admin.reports.reports', compact('reports'));
-    // }
-
     public function reports(){
-        $reports = Report::with('reportable')->latest()->get();
+        // $reports = Report::with('reportable')->latest()->get();
 
-        return view('admin.reports.reports', compact('reports'));
+        return view('admin.reports.reports');
     }
 
-//     public function getReports(Request $request)
-// {
-//     if ($request->ajax()) {
-//         // Start building the query for reports
-//         $reports = Report::with('reportable') // assuming reports have a polymorphic relation 'reportable'
-//                          ->latest(); // Order by the latest reports
+    public function getReports(Request $request) {
+        $reports = Report::with('user', 'reportable')->get();
 
-//         // Apply filters if provided in the request
-//         if ($request->has('status') && $request->status) {
-//             $reports->where('status', $request->status); // Filter by status
-//         }
+        if ($request->ajax()) {
+            return DataTables::of($reports)
+                ->addIndexColumn()
+                ->addColumn('reported', function ($row) {
 
-//         if ($request->has('category') && $request->category) {
-//             $reports->where('reportable_type', $request->category); // Filter by category (polymorphic entity type)
-//         }
+                    $user = route('admin.userprofile', encrypt($row->user->id));
+                    return '<a href ="' . $user .'" target="_blank">' . $row->user->name . '</a>';
+                    return $row->user ? $row->user->name : 'N/A';
+                })
+                ->addColumn('content_type', function ($row) {
+                    return class_basename($row->reportable_type);
+                })
+                ->addColumn('content', function ($row) {
+                    if ($row->reportable_type === 'App\Models\Blog') {
 
-//         if ($request->has('date_from') && $request->has('date_to')) {
-//             $reports->whereBetween('created_at', [$request->date_from, $request->date_to]); // Filter by date range
-//         }
+                        $blog = route('admin.converstaions', encrypt($row->reportable_id));
 
-//         // Select relevant columns (you can also limit to specific columns)
-//         $reports = $reports->select('*');
+                        return '<a href="'.$blog.'" target="_blank">'. $row->reportable->user->name .'</a>';
 
-//         // Return data for DataTables with additional columns for actions and checkboxes
-//         return DataTables::of($reports)
-//             ->addColumn('checkbox', function ($report) {
-//                 // Adds a checkbox for each report
-//                 return '<input type="checkbox" name="select[]" value="' . $report->id . '">';
-//             })
-//             ->addColumn('action', function ($report) {
-//                 // Add action buttons like view, delete, etc.
-//                 $detailsUrl = route('admin.reports.show', $report->id); // Route to view details
-//                 return '<a class="btn btn-info" href="' . $detailsUrl . '"><i class="fa fa-eye"></i> View</a>';
-//             })
-//             ->addColumn('reportable_name', function ($report) {
-//                 // Show the name of the related entity based on 'reportable_type'
-//                 return $report->reportable ? $report->reportable->name : 'N/A';
-//             })
-//             ->rawColumns(['checkbox', 'action']) // Ensure raw HTML is rendered in those columns
-//             ->addIndexColumn() // Adds a serial number column
-//             ->make(true); // Returns the data in the proper format for DataTables
-//     }
+                    }
+                    elseif ($row->reportable_type === 'App\Models\User') {
+                        $user = route('admin.userprofile', encrypt($row->user_id));
+                        return "<a href=' . $user . ' target='_blank'>" . $row->reportable->name . "</a>";
+                    } elseif ($row->reportable_type === 'App\Models\Comment') {
+                        if ($row->reportable && !$row->reportable->comment) {
+                            return '<span class="text-danger">Comment Was Removed</span>';
+                        } elseif ($row->reportable) {
+                            return Str::limit($row->reportable->comment, 50);
+                        } else {
+                            return '<span class="text-danger">No content available</span>';
+                        }
+                    }
+                    return 'N/A';
+                })
+                ->addColumn('action', function ($row) {
+                    $actionButton = '';
 
-//     return response()->json(['error' => 'Invalid request']); // If it's not an AJAX request
-// }
+                    if ($row->reportable_type === 'App\Models\Comment') {
+                        if ($row->reportable && !$row->reportable->comment) {
+                            $actionButton = '<button class="btn btn-success btn-sm">Removed Comment</button>';
+                        } elseif ($row->reportable) {
+                            $actionButton = '<button type="button" class="btn btn-danger btn-sm" id="deleteComment" data-id="' . encrypt($row->reportable_id) . '">Delete comment</button>';
+                        } else {
+                            $actionButton = '<span class="text-danger">Report Handled</span>';
+                        }
+                    } else {
+                        $actionButton = '<a href="' . route('admin.handlereport', encrypt($row->id)) . '" class="btn btn-warning btn-sm">Handle Report</a>';
+                    }
 
+                    return $actionButton;
+                })
+                ->make(true);
+        }
+    }
 
 
     public function handleReport($id){
