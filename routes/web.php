@@ -64,6 +64,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/', [AdminController::class, 'index'])->name('index');
 
     Route::get('users', [AdminController::class, 'users'])->name('users');
+    Route::get('get-users', [AdminController::class, 'getUsers'])->name('getusers');
     Route::get('user-profile/{id}', [AdminController::class, 'userProfile'])->name('userprofile');
     Route::post('/user/ban-unban', [AdminController::class, 'banUnbanUser'])->name('banunbanuser');
     Route::post('/blog/ban-unban', [AdminController::class, 'banUnbanBlog'])->name('banunbanblog');

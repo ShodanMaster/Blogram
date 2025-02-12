@@ -17,9 +17,46 @@ class AdminController extends Controller
     }
 
     public function users(){
-        $users = User::all();
-        return view('admin.users.users', compact('users'));
+
+        return view('admin.users.users');
     }
+
+    public function getUsers(Request $request)
+    {
+        $users = User::all();
+        if ($request->ajax()) {
+            return DataTables::of($users)
+                ->addIndexColumn()
+                ->addColumn('name', function ($row) {
+                    // Fix the link generation in the name column
+                    $user = route('admin.userprofile', encrypt($row->id));
+                    return '<a href="' . $user . '" target="_blank">' . $row->name . '</a>';
+                })
+                ->addColumn('Registration Through', function ($row) {
+                    return $row->google_id == null ? 'Registration' : 'Google';
+                })
+                ->addColumn('action', function ($row) {
+                    $statusClass = $row->ban ? 'bg-danger' : 'bg-success';
+                    $statusText = $row->ban ? 'Banned' : 'Active';
+                    $buttonClass = $row->ban ? 'btn-success' : 'btn-danger';
+                    $buttonText = $row->ban ? 'Unban' : 'Ban';
+
+                    return '
+                        <div class="user-card">
+                            <span id="userStatus' . $row->id . '" class="badge ' . $statusClass . '">
+                                ' . $statusText . '
+                            </span>
+
+                            <button type="button" class="btn ' . $buttonClass . ' btn-sm" id="banButton" value="' . $row->id . '">
+                                ' . $buttonText . '
+                            </button>
+                        </div>
+                    ';
+                })
+                ->make(true);
+        }
+    }
+
 
     public function banUnbanUser(Request $request)
     {
