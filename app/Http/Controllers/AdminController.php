@@ -10,6 +10,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Str;
+
+
 class AdminController extends Controller
 {
     public function index(){
@@ -194,8 +197,39 @@ class AdminController extends Controller
     }
 
     public function comments(){
-        $comments = Comment::all();
-        return view('admin.comments.comments', compact('comments'));
+
+        return view('admin.comments.comments');
+    }
+
+    public function getComments(Request $request){
+        $comments = Comment::with('user', 'blog')->whereHas('blog')->latest()->get();
+
+        if($request->ajax()){
+            return DataTables::of($comments)
+                ->addIndexColumn()
+                ->addColumn('comment', function($row){
+                    return $row->comment;
+                })
+                ->addColumn('commented_by', function($row){
+                    // return $row->user->name;
+
+                    $user = route('admin.userprofile', encrypt($row->user->id));
+
+                    return '<a href ="' . $user .'" target="_blank">' . $row->user->name . '</a>';
+                })
+                ->addColumn('blog', function($row){
+
+                    $blog = route('admin.converstaions', encrypt($row->blog->id));
+
+                    return '<a href ="' . $blog .'" target="_blank">' . $row->blog->title . '</a>';
+
+                })->addColumn('action', function($row){
+                    return '<button type="button" class="btn btn-danger" id="deleteComment" data-id="'. encrypt($row->id) .'">
+                            Delete Comment
+                        </button>';
+                })
+                ->make(true);
+        }
     }
 
     public function reports(){
@@ -205,7 +239,7 @@ class AdminController extends Controller
     }
 
     public function getReports(Request $request) {
-        $reports = Report::with('user', 'reportable')->get();
+        $reports = Report::with('user', 'reportable')->latest()->get();
 
         if ($request->ajax()) {
             return DataTables::of($reports)
@@ -213,7 +247,9 @@ class AdminController extends Controller
                 ->addColumn('reported', function ($row) {
 
                     $user = route('admin.userprofile', encrypt($row->user->id));
+
                     return '<a href ="' . $user .'" target="_blank">' . $row->user->name . '</a>';
+                    // return '<a href ="' . $user .'" target="_blank">' . $row->user->name . '</a>';
                     return $row->user ? $row->user->name : 'N/A';
                 })
                 ->addColumn('content_type', function ($row) {
@@ -224,13 +260,16 @@ class AdminController extends Controller
 
                         $blog = route('admin.converstaions', encrypt($row->reportable_id));
 
-                        return '<a href="'.$blog.'" target="_blank">'. $row->reportable->user->name .'</a>';
+                        return '<a href ="' . $blog .'" target="_blank">' . $row->reportable->title . '</a>';
+
+                        // return '<a href="'.$blog.'" target="_blank">'. $row->reportable->user->name .'</a>';
 
                     }
                     elseif ($row->reportable_type === 'App\Models\User') {
-                        $user = route('admin.userprofile', encrypt($row->user_id));
-                        return "<a href=' . $user . ' target='_blank'>" . $row->reportable->name . "</a>";
-                    } elseif ($row->reportable_type === 'App\Models\Comment') {
+                        $user = route('admin.userprofile', encrypt($row->reportable_id));
+                        return "<a href='" . $user . "' target='_blank'>" . $row->reportable->name . "</a>";
+                    }
+                     elseif ($row->reportable_type === 'App\Models\Comment') {
                         if ($row->reportable && !$row->reportable->comment) {
                             return '<span class="text-danger">Comment Was Removed</span>';
                         } elseif ($row->reportable) {

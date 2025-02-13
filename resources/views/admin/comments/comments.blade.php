@@ -2,42 +2,75 @@
 @section('content')
     <h1>Comments</h1>
 
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">comment</th>
-                <th scope="col">Commented By</th>
-                <th scope="col">blog</th>
-                <th scope="col">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($comments as $comment)
-            @if ($comment->blog)
+    <div class="table-responsive">
+        <table class="table table-striped table-hover" id="commentsTable">
+            <thead>
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{$comment->comment}}</td>
-                    <td><a href="{{route('admin.userprofile', encrypt($comment->user->id))}}">{{ $comment->user->name }}</a></td>
-                    <td><a href="{{route('admin.converstaions', encrypt($comment->blog->id))}}">see blog</a></td>
-                    <td>
-                        <button type="button" class="btn btn-danger" id="deleteComment" data-id="{{ encrypt($comment->id) }}">
-                            Delete Comment
-                        </button>
-                    </td>
+                    <th scope="col">#</th>
+                    <th scope="col">Comment</th>
+                    <th scope="col">Commented By</th>
+                    <th scope="col">blog</th>
+                    <th scope="col">Action</th>
                 </tr>
-            @endif
-            @empty
-                <tr>
-                    <td colspan="5" class="text-center">No comments found.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 @endsection
 
 @section('scripts')
     <script>
+
+        $(document).ready(function () {
+
+            var table = $('#commentsTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('admin.getcomments') }}",
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'comment', name: 'Comment' },
+                    { data: 'commented_by', name: 'Commented By' },
+                    { data: 'blog', name: 'blog' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                columnDefs: [
+                    {
+                        targets: 2,
+                        data: 'commented_by',
+                        render: function(data, type, row) {
+                            if (type === 'display') {
+                                // If the content_type is an object, convert it to a string
+                                if (typeof data === 'object') {
+                                    data = JSON.stringify(data);
+                                }
+
+                                // Render it as HTML if needed
+                                return $('<div>').html(data).text();  // Ensure HTML tags are interpreted correctly
+                            }
+                            return data; // For other cases, return raw text
+                        }
+                    },
+                    {
+                        targets: 3,
+                        data: 'blog',
+                        render: function(data, type, row) {
+                            if (type === 'display') {
+                                // If the content_type is an object, convert it to a string
+                                if (typeof data === 'object') {
+                                    data = JSON.stringify(data);
+                                }
+
+                                // Render it as HTML if needed
+                                return $('<div>').html(data).text();  // Ensure HTML tags are interpreted correctly
+                            }
+                            return data; // For other cases, return raw text
+                        }
+                    },
+                ]
+            });
+        });
+
         $(document).on('click', '#deleteComment', function (e) {
             e.preventDefault();
 

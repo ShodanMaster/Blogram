@@ -36,7 +36,7 @@
 
                 columnDefs: [
                     {
-                        targets: 1, // The index of the 'content_type' column
+                        targets: 1,
                         data: 'name',
                         render: function(data, type, row) {
                             if (type === 'display') {
