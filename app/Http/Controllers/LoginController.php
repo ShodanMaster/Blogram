@@ -139,7 +139,7 @@ class LoginController extends Controller
         try{
             if (Hash::check($request->currentpassword, Auth::user()->password)) {
                 Auth::user()->update([
-                    'password' => bcrypt($request->password), // Fix typo: 'password' instead of 'passowrd'
+                    'password' => bcrypt($request->password),
                 ]);
                 return redirect()->back()->with('success','Password Changed Successfully');
             }else{
