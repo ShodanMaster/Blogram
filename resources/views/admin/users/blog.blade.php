@@ -91,7 +91,6 @@
                     <ul class="dropdown-menu">
                         @if((Auth::check() && Auth::id() == $blog->user_id) || Auth::check() && Auth::id() == $comment->user_id)
                             <li><a class="dropdown-item" href="#" id="deleteComment" data-id="{{ encrypt($comment->id) }}">Delete Comment</a></li>
-
                         @endif
                     </ul>
                 </div>

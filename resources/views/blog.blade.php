@@ -173,10 +173,10 @@
                         </svg>
                     </button>
                     <ul class="dropdown-menu">
-                        @if((Auth::check() && Auth::id() == $blog->user_id) || Auth::check() && Auth::id() == $comment->user_id)
+                        @if(Auth::check() && (Auth::id() == $blog->user_id || Auth::id() == $comment->user_id))
                             <li><a class="dropdown-item" href="#" id="deleteComment" data-id="{{ encrypt($comment->id) }}">Delete Comment</a></li>
                         @else
-                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="comment" data-commentid="{{ encrypt($comment->id) }}">Report Comment</a></li>
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="comment" data-commentid="{{ encrypt($comment->id) }}">Report Comment</a></li>
                         @endif
                     </ul>
                 </div>

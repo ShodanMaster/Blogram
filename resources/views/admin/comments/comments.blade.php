@@ -69,79 +69,80 @@
                     },
                 ]
             });
-        });
 
-        $(document).on('click', '#deleteComment', function (e) {
-            e.preventDefault();
 
-            var blogId = $(this).data('id');
+            $(document).on('click', '#deleteComment', function (e) {
+                e.preventDefault();
 
-            var formData = new FormData();
-            formData.append('id', blogId);
+                var blogId = $(this).data('id');
 
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+                var formData = new FormData();
+                formData.append('id', blogId);
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Do you want to delete this Comment?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'No, cancel!',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: "POST",
-                        url: "{{ route('admin.deletecomment') }}",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            if (response.status == 200) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Deleted',
-                                    text: response.message,
-                                    confirmButtonText: 'OK'
-                                }).then(function() {
-                                    location.reload();
-                                });
-                            } else if (response.status == 404) {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to delete this Comment?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ route('admin.deletecomment') }}",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                if (response.status == 200) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Deleted',
+                                        text: response.message,
+                                        confirmButtonText: 'OK'
+                                    }).then(function() {
+                                        table.draw();
+                                    });
+                                } else if (response.status == 404) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Not Found',
+                                        text: response.message,
+                                        confirmButtonText: 'OK'
+                                    }).then(function() {
+                                        table.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message,
+                                        confirmButtonText: 'OK'
+                                    }).then(function() {
+                                        table.ajax.reload();
+                                    });
+                                }
+                            },
+
+                            error: function(xhr, status, error) {
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Not Found',
-                                    text: response.message,
+                                    title: 'Oops...',
+                                    text: 'Something went wrong. Please try again.',
                                     confirmButtonText: 'OK'
-                                }).then(function() {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: response.message,
-                                    confirmButtonText: 'OK'
-                                }).then(function() {
-                                    location.reload();
                                 });
                             }
-                        },
-
-                        error: function(xhr, status, error) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'Something went wrong. Please try again.',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
     </script>

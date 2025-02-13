@@ -115,7 +115,7 @@
                                     text: response.message,
                                     confirmButtonText: 'OK'
                                 }).then(function() {
-                                    location.reload();
+                                    table.draw();
                                 });
                             } else {
                                 Swal.fire({
@@ -123,6 +123,8 @@
                                     title: 'Error',
                                     text: response.message,
                                     confirmButtonText: 'OK'
+                                }).then(function() {
+                                    table.ajax.reload();
                                 });
                             }
                         },
