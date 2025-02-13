@@ -88,6 +88,54 @@
     </div>
 </div>
 
+{{-- Follow List Modal --}}
+<div class="modal fade" id="followListModal" tabindex="-1" aria-labelledby="followListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary">
+                <h1 class="modal-title fs-5" id="followListModalLabel">Following Users</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-dark">
+
+                <!-- Checkbox to toggle between Following and Followers -->
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="toggleFollowingFollowers">
+                    <label class="form-check-label text-white" for="toggleFollowingFollowers">Show Followers</label>
+                </div>
+
+                <div class="div" id="following">
+                    @if($followingUsers->isNotEmpty())
+                        <ul class="list-group">
+                            @foreach($followingUsers as $userFollow)
+                                <li class="list-group-item">
+                                    <a href="{{route('profile.userprofile', encrypt($userFollow->followedUser->id))}}">{{ $userFollow->followedUser->name }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-white">You are not following anyone.</p>
+                    @endif
+                </div>
+
+                <div class="div" id="followers" style="display: none;">
+                    @if($followedUsers->isNotEmpty())
+                        <ul class="list-group">
+                            @foreach($followedUsers as $userFollowed)
+                                <li class="list-group-item">
+                                    <a href="{{route('profile.userprofile', encrypt($userFollowed->followedUser->id))}}">{{ $userFollowed->followedUser->name }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-white">You don't have any followers.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card bg-dark text-white mb-3">
     <div class="card-body">
         <div class="row">
@@ -125,8 +173,13 @@
                     </div>
 
                     <!-- Follow/Followers Section (Optional) -->
-                    <div class="col-12 mt-2">
-                        <span class="text-white">1000 followers | 500 following</span>
+                    <div class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#followListModal">
+                        <span id="followCount">
+                            {{ Auth::user()->followers()->count() }} Followers
+                        </span>
+                        <span id="followCount">
+                            {{ Auth::user()->following()->count() }} Following
+                        </span>
                     </div>
 
                     <!-- Edit Profile Button -->
@@ -226,6 +279,22 @@
 </script>
     <script>
         $(document).ready(function(){
+
+            document.getElementById('toggleFollowingFollowers').addEventListener('change', function() {
+                var followingSection = document.getElementById('following');
+                var followersSection = document.getElementById('followers');
+
+                if (this.checked) {
+                    // Show followers, hide following
+                    followersSection.style.display = 'block';
+                    followingSection.style.display = 'none';
+                } else {
+                    // Show following, hide followers
+                    followingSection.style.display = 'block';
+                    followersSection.style.display = 'none';
+                }
+            });
+
 
             $(document).on('submit', '#updateProfile', function (e) {
                 e.preventDefault();

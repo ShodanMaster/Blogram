@@ -63,4 +63,22 @@ class User extends Authenticatable
         return $this->hasMany(Report::class);
     }
 
+    // Define the followers relationship
+    public function followers()
+    {
+        return $this->hasMany(UserFollow::class, 'followed_id');
+    }
+
+    // Define the users the current user follows
+    public function following()
+    {
+        return $this->hasMany(UserFollow::class, 'follower_id');
+    }
+
+    // Define the method to check if the user is following another user
+    public function isFollowing($userId)
+    {
+        return $this->following()->where('followed_id', $userId)->exists();
+    }
+    
 }

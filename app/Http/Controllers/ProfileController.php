@@ -13,8 +13,10 @@ class ProfileController extends Controller
 {
     public function index(){
         $blogs = Blog::where('user_id', Auth::user()->id)->latest()->paginate(10);
-        // dd($blogs->toArray());
-        return view('profile.index', compact('blogs'));
+        $followingUsers = Auth::user()->following()->with('followedUser')->get();
+        $followedUsers = Auth::user()->followers()->with('followerUser')->get();
+
+        return view('profile.index', compact('blogs', 'followingUsers', 'followedUsers'));
     }
 
     public function updateProfile(Request $request)
@@ -88,7 +90,10 @@ class ProfileController extends Controller
                 if(Auth::user() == $user){
                     return redirect()->route('profile.index');
                 }else{
-                    return view('profile.userprofile', compact('user'));
+                    $followingUsers = $user->following()->with('followedUser')->get();
+                    $followedUsers = $user->followers()->with('followerUser')->get();
+
+                    return view('profile.userprofile', compact('user', 'followingUsers', 'followedUsers'));
                 }
             }
             else{

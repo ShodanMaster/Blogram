@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
@@ -56,6 +57,9 @@ Route::middleware('checkuser')->group(function(){
         Route::post('store-comment', [CommentController::class, 'storeComment'])->name('storecomment');
         Route::post('delete-comment', [CommentController::class, 'deleteComment'])->name('deletecomment');
     });
+
+    Route::post('/follow/{userId}', [FollowController::class, 'follow'])->name('follow');
+    Route::post('/unfollow/{userId}', [FollowController::class, 'unfollow'])->name('unfollow');
 
     Route::post('report', [IndexController::class, 'report'])->name('report');
 });

@@ -1,6 +1,54 @@
 @extends('app.master')
 @section('content')
 
+{{-- Follow List Modal --}}
+<div class="modal fade" id="followListModal" tabindex="-1" aria-labelledby="followListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary">
+                <h1 class="modal-title fs-5" id="followListModalLabel">Following Users</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-dark">
+
+                <!-- Checkbox to toggle between Following and Followers -->
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="toggleFollowingFollowers">
+                    <label class="form-check-label text-white" for="toggleFollowingFollowers">Show Followers</label>
+                </div>
+
+                <div class="div" id="following">
+                    @if($followingUsers->isNotEmpty())
+                        <ul class="list-group">
+                            @foreach($followingUsers as $userFollow)
+                                <li class="list-group-item">
+                                    {{ $userFollow->followedUser->name }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-white">You are not following anyone.</p>
+                    @endif
+                </div>
+
+                <div class="div" id="followers" style="display: none;">
+                    @if($followedUsers->isNotEmpty())
+                        <ul class="list-group">
+                            @foreach($followedUsers as $userFollowed)
+                                <li class="list-group-item">
+                                    {{ $userFollowed->followedUser->name }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-white">You don't have any followers.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Report Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -66,8 +114,21 @@
                     </div>
 
                     <!-- Follow/Followers Section (Optional) -->
-                    <div class="col-12 mt-2">
-                        <span class="text-white">1000 followers | 500 following</span>
+                    @php
+                        $isFollowing = auth()->user()->isFollowing($user->id);
+                    @endphp
+
+                    <button type="button" class="btn follow-button {{ $isFollowing ? 'btn-danger' : 'btn-primary' }}" value="{{ $user->id }}">
+                        {{ $isFollowing ? 'Unfollow' : 'Follow' }}
+                    </button>
+
+                    <div class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#followListModal">
+                        <span id="followCount{{ $user->id }}">
+                            {{ $user->followers()->count() }} Followers
+                        </span>
+                        <span id="followCount{{ $user->id }}">
+                            {{ $user->following()->count() }} Following
+                        </span>
                     </div>
 
                 </div>
@@ -160,6 +221,21 @@
 @endsection
 @section('scripts')
     <script>
+        document.getElementById('toggleFollowingFollowers').addEventListener('change', function() {
+            var followingSection = document.getElementById('following');
+            var followersSection = document.getElementById('followers');
+
+            if (this.checked) {
+                // Show followers, hide following
+                followersSection.style.display = 'block';
+                followingSection.style.display = 'none';
+            } else {
+                // Show following, hide followers
+                followingSection.style.display = 'block';
+                followersSection.style.display = 'none';
+            }
+        });
+
         $(document).on('click', '#likeButton', function (e) {
             e.preventDefault();  // Prevent the default action
 
@@ -289,5 +365,51 @@
                 }
             });
         });
+
+        $(document).on('click', '.follow-button', function (e) {
+            e.preventDefault();
+
+            var button = $(this);
+            var userId = button.val();  // Get the user ID (the profile being followed/unfollowed)
+            var followCountElement = $('#followCount' + userId);  // Get the element that shows follower count
+
+            // Check if the current action is follow or unfollow based on the button text
+            var actionType = button.text().trim().toLowerCase();  // "follow" or "unfollow"
+
+            // Determine the action route
+            var url = actionType === 'follow' ? "{{ route('follow', ':userId') }}" : "{{ route('unfollow', ':userId') }}";
+            url = url.replace(':userId', userId);  // Replace placeholder with actual user ID
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                },
+                success: function(response) {
+                    if (response.status === 200) {
+                        // Toggle button text and classes based on the response
+                        if (response.message.includes('following')) {
+                            button.text('Unfollow');
+                            button.removeClass('btn-primary').addClass('btn-danger');  // Switch button style
+                        } else {
+                            button.text('Follow');
+                            button.removeClass('btn-danger').addClass('btn-primary');  // Switch button style
+                        }
+
+                        // Update the follower count
+                        followCountElement.text(response.followCount + ' Followers');
+                    } else {
+                        alert(response.message);  // Show error message if any
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('There was an error. Please try again later.');
+                }
+            });
+        });
+
+
     </script>
 @endsection

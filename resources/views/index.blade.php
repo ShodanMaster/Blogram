@@ -61,6 +61,95 @@
 
 <h1>Blogram</h1>
 <div id="blog-container">
+
+    @foreach($followersBlogs as $userFollow)
+        @php
+            $followedUser = $userFollow->followedUser; // Access the followed user
+        @endphp
+
+        @if($followedUser && $followedUser->blogs->isNotEmpty())
+            @foreach($followedUser->blogs as $blog)
+                <div class="card bg-dark mb-3">
+                    <div class="card-header bg-secondary text-white fs-4 d-flex justify-content-between">
+                        {{ $blog->title }}
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                                    <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                                </svg>
+                            </button>
+                            <ul class="dropdown-menu">
+                                @if(Auth::check() && Auth::id() == $blog->user_id)
+                                    <li><a class="dropdown-item" href="#" id="deleteBlog" data-id="{{ encrypt($blog->id) }}">Delete Blog</a></li>
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editBlogModal"
+                                        data-id="{{encrypt($blog->id)}}"
+                                        data-title = "{{$blog->title}}"
+                                        data-content = "{{$blog->content}}"
+                                        >
+                                        Edit</a>
+                                    </li>
+                                @else
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="blog" data-blogid="{{ encrypt($blog->id) }}">Report Blog</a></li>
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal" data-name="user" data-userid="{{ encrypt($blog->user->id) }}">Report User</a></li>
+                                @endif
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body text-white text-center">
+                        {!! $blog->content !!}
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <a href="{{route('profile.userprofile', encrypt($blog->user->id))}}" class="text-decoration-none">
+                            <div class="user d-flex align-items-center">
+                                @if($blog->user->profile && $blog->user->profile->profile_image)
+                                {{-- <p class="text-white">{{$blog->user->profile->profile_image}}</p> --}}
+                                    <img src="{{ asset('storage/' . $blog->user->profile->profile_image) }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
+
+                                @else
+                                    <img src="{{ asset('defaults/default_profile.jpeg') }}"
+                                        alt="No profile photo"
+                                        title="No profile photo"
+                                        class="rounded-circle" width="40" height="40">
+                                @endif
+                                <span class="ms-2 text-white">{{ $blog->user->name }}</span>
+                            </div>
+                        </a>
+                        <div class="conversation">
+                            <a href="{{route('conversation.converstaions', encrypt($blog->id))}}">see conversations
+                                <span class="text-secondary">
+                                    @if (count($blog->comments)>99)
+                                    |99+
+                                    @elseif (count($blog->comments)<1)
+
+                                    @else
+                                    |{{count($blog->comments)}}
+                                    @endif
+                                </span>
+                            </a>
+                        </div>
+                        <div class="like">
+                            <button type="button" class="btn btn-primary" id="likeButton" value="{{ encrypt($blog->id) }}">
+                                @if(auth()->check() && auth()->user()->likedBlogs()->where('blog_id', $blog->id)->exists())
+                                    Unlike
+                                @else
+                                    Like
+                                @endif
+                            </button>
+                            <span id="likeCount{{ $blog->id }}" class="text-white">
+                                {{ $blog->likedUsers()->count() }} Likes
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+            @endforeach
+            @endif
+    @endforeach
+        <span class="align-center text-white">Got up with all latest posts from following users.</span>
+        <hr>
+
+
     @forelse ($blogs as $blog)
         <div class="card bg-dark mb-3">
             <div class="card-header bg-secondary text-white fs-4 d-flex justify-content-between">
