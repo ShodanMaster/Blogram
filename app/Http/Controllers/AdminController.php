@@ -16,7 +16,11 @@ use Illuminate\Support\Str;
 class AdminController extends Controller
 {
     public function index(){
-        return view('admin.index');
+        $blogs = blog::count();
+        $users = User::count();
+        $comments = Comment::whereHas('blog')->count();
+        $reports = Report::count();
+        return view('admin.index', compact('users', 'blogs', 'comments', 'reports'));
     }
 
     public function users(){

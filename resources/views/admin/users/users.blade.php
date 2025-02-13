@@ -2,18 +2,20 @@
 @section('content')
     <h1>Users</h1>
 
-    <table class="table table-striped table-hover" id="usersTable">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Registered Through</th>
-                <th scope="col">Restricted</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover" id="usersTable">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Registered Through</th>
+                    <th scope="col">Restricted</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 @endsection
 
 @section('scripts')
