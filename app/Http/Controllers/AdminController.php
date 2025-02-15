@@ -108,7 +108,9 @@ class AdminController extends Controller
 
             if($user){
 
-                return view('admin.users.userprofile', compact('user'));
+                $followingUsers = $user->following()->with('followedUser')->get();
+                $followedUsers = $user->followers()->with('followerUser')->get();
+                return view('admin.users.userprofile', compact('user', 'followingUsers', 'followedUsers'));
             }
             else{
                 return redirect()->back()->with('error', 'User Not Found');

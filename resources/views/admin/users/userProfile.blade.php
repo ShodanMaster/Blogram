@@ -38,9 +38,45 @@
 
                     <!-- Follow/Followers Section (Optional) -->
                     <div class="col-12 mt-2">
-                        <span class="text-muted">1000 followers | 500 following</span>
-                    </div>
+                        <span id="followCount{{ $user->id }}">
+                            {{ $user->followers()->count() }} Followers|
+                            {{ $user->following()->count() }} Following
+                        </span>
 
+                        <!-- Checkbox to toggle between Following and Followers -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="toggleFollowingFollowers">
+                            <label class="form-check-label text-white" for="toggleFollowingFollowers">Show Followers</label>
+                        </div>
+
+                        <div class="div" id="following">
+                            @if($followingUsers->isNotEmpty())
+                                <ul class="list-group">
+                                    @foreach($followingUsers as $userFollow)
+                                        <li class="list-group-item">
+                                            {{ $userFollow->followedUser->name }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-white">This User not following anyone.</p>
+                            @endif
+                        </div>
+
+                        <div class="div" id="followers" style="display: none;">
+                            @if($followedUsers->isNotEmpty())
+                                <ul class="list-group">
+                                    @foreach($followedUsers as $userFollowed)
+                                        <li class="list-group-item">
+                                            {{ $userFollowed->followedUser->name }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-white">This User don't have any followers.</p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,6 +173,20 @@
 @endsection
 @section('scripts')
     <script>
+        document.getElementById('toggleFollowingFollowers').addEventListener('change', function() {
+            var followingSection = document.getElementById('following');
+            var followersSection = document.getElementById('followers');
+
+            if (this.checked) {
+                // Show followers, hide following
+                followersSection.style.display = 'block';
+                followingSection.style.display = 'none';
+            } else {
+                // Show following, hide followers
+                followingSection.style.display = 'block';
+                followersSection.style.display = 'none';
+            }
+        });
         $(document).on('click', '#banBlogButton', function (e) {
             e.preventDefault();
 
