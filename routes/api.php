@@ -21,8 +21,10 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('logging-in', [LoginController::class, 'loggingIn']);
-Route::get('logging-out', [LoginController::class, 'loggingOut']);
+Route::post('register', [LoginController::class, 'register']);
 
-Route::middleware('auth:admin')->prefix('admin')->group(function(){
+Route::middleware('auth:adminapi')->prefix('admin')->group(function(){
     Route::get('/', [AdminController::class, 'index']);
+    Route::get('refresh', [LoginController::class, 'refreshToken']);
+    Route::get('logging-out', [LoginController::class, 'loggingOut']);
 });

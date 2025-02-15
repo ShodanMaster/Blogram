@@ -3,43 +3,80 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\AdminResource;
-use App\Http\Resources\UserResource;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
+
+    public function register(Request $request){
+        // dd("inside");
+        // dd($request->all());
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+        ]);
+        // dd("inside");
+
+        try{
+
+            User::Create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User Registered Successfully!',
+            ]);
+        }catch(Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Something Went Wrong! '. $e->getMessage(),
+            ]);
+
+        }
+    }
+
     public function loggingIn(Request $request){
+
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
         try {
-            $credentials = [
-                'email' => $request->email,
-                'password' => $request->password,
-            ];
-
+            $credentials = $request->only('email', 'password');
             $rememberMe = $request->has('rememberMe');
 
-            if (auth()->guard('web')->attempt($credentials, $rememberMe)) {
+            // Web guard authentication
+            if (auth()->guard('webapi')->attempt($credentials, $rememberMe)) {
+                $user = auth()->guard('webapi')->user();
+                $token = auth()->guard('webapi')->attempt($credentials);
+
                 return response()->json([
                     'status' => 200,
                     'guard' => 'web',
                     'message' => 'Login successful',
-                    'user' => new UserResource(auth()->guard('web')->user()), // Send user details as resource
+                    'token' => $token,
                 ], 200);
             }
 
-            if (auth()->guard('admin')->attempt($credentials, $rememberMe)) {
+            // Admin API authentication
+            if (auth()->guard('adminapi')->attempt($credentials, $rememberMe)) {
+                $admin = auth()->guard('adminapi')->user();
+                $token = auth()->guard('adminapi')->attempt($credentials);
+
                 return response()->json([
                     'status' => 200,
                     'guard' => 'admin',
                     'message' => 'Login successful',
-                    'user' => new AdminResource(auth()->guard('admin')->user()), // Send admin details as resource
+                    'token' => $token,
                 ], 200);
             }
 
@@ -53,24 +90,67 @@ class LoginController extends Controller
             return response()->json([
                 'status' => 500,
                 'message' => 'Something went wrong: ' . $e->getMessage()
-
             ], 500);
         }
     }
 
-    public function loggingOut(){
+    public function refreshToken(){
+
+        $guards = ['webapi', 'adminapi']; // Only JWT guards should be refreshed
 
         try {
+            foreach ($guards as $guard) {
+                if (auth()->guard($guard)->check()) {
+                    $newToken = auth()->guard($guard)->refresh();
 
-            auth()->logout();
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'New Access Token Generated',
+                        'token' => $newToken,
+                        'guard' => $guard, // Indicating which guard was refreshed
+                    ], 200);
+                }
+            }
 
             return response()->json([
-                'status' => 200,
-                'message' => 'Logged out successfully.',
-            ], 200);
+                'status' => false,
+                'message' => 'No authenticated user found or token cannot be refreshed.',
+            ], 401);
 
         } catch (Exception $e) {
+            Log::error('Token Refresh Failed: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Internal Server Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
+
+    public function loggingOut(Request $request){
+
+        try {
+            // Determine the authenticated guard
+            $guards = ['webapi', 'adminapi'];
+
+            foreach ($guards as $guard) {
+                if (auth()->guard($guard)->check()) {
+                    auth()->guard($guard)->logout();
+
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Logged out successfully.',
+                        'guard' => $guard, // Indicate which guard was logged out
+                    ], 200);
+                }
+            }
+
+            return response()->json([
+                'status' => 401,
+                'message' => 'No authenticated user found.',
+            ], 401);
+
+        } catch (Exception $e) {
             Log::error('Logout Failed: ' . $e->getMessage());
             return response()->json([
                 'status' => 500,
@@ -78,5 +158,6 @@ class LoginController extends Controller
             ], 500);
         }
     }
+
 
 }
