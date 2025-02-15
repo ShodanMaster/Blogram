@@ -109,7 +109,7 @@ class AdminController extends Controller
             if($user){
 
                 $followingUsers = $user->following()->with('followedUser')->get();
-                // $followedUsers = $user->followers()->with('followerUser')->get();
+                $followedUsers = $user->followers()->with('followerUser')->get();
                 return view('admin.users.userprofile', compact('user', 'followingUsers', 'followedUsers'));
             }
             else{
@@ -121,8 +121,13 @@ class AdminController extends Controller
         }
     }
 
-    public function banUnbanBlog(Request $request)
-    {
+    public function blogs(){
+        $blogs = Blog::all();
+        return view('admin.blogs.blogs', compact('blogs'));
+    }
+
+    public function banUnbanBlog(Request $request){
+
         $blogId = $request->input('blog_id');
 
         $blog = Blog::find($blogId);
@@ -197,13 +202,7 @@ class AdminController extends Controller
         }
     }
 
-    public function blogs(){
-        $blogs = Blog::all();
-        return view('admin.blogs.blogs', compact('blogs'));
-    }
-
     public function comments(){
-
         return view('admin.comments.comments');
     }
 
@@ -330,11 +329,14 @@ class AdminController extends Controller
                 return redirect()->back()->with('error', ucfirst(class_basename($modelClass)) . ' Not Found!');
             }
 
-            $model->update(['ban' => true]);
-
             $report->update(['status' => $status]);
+            if($request->status == 'resolved'){
+                $model->update(['ban' => true]);
+                return redirect()->back()->with('success', ucfirst(class_basename($modelClass)) . ' Banned!');
+            }
+            return redirect()->back()->with('success', ucfirst(class_basename($modelClass)) . ' Report Handled!');
 
-            return redirect()->back()->with('success', ucfirst(class_basename($modelClass)) . ' Banned!');
+
         } catch (Exception $e) {
 
             Log::error('Error handling report: ' . $e->getMessage());

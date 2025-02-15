@@ -13,14 +13,12 @@ class LoginController extends Controller
 {
 
     public function register(Request $request){
-        // dd("inside");
-        // dd($request->all());
+
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
         ]);
-        // dd("inside");
 
         try{
 
@@ -96,7 +94,7 @@ class LoginController extends Controller
 
     public function refreshToken(){
 
-        $guards = ['webapi', 'adminapi']; // Only JWT guards should be refreshed
+        $guards = ['webapi', 'adminapi'];
 
         try {
             foreach ($guards as $guard) {
@@ -107,7 +105,7 @@ class LoginController extends Controller
                         'status' => true,
                         'message' => 'New Access Token Generated',
                         'token' => $newToken,
-                        'guard' => $guard, // Indicating which guard was refreshed
+                        'guard' => $guard,
                     ], 200);
                 }
             }
@@ -130,7 +128,7 @@ class LoginController extends Controller
     public function loggingOut(Request $request){
 
         try {
-            // Determine the authenticated guard
+
             $guards = ['webapi', 'adminapi'];
 
             foreach ($guards as $guard) {
@@ -140,7 +138,7 @@ class LoginController extends Controller
                     return response()->json([
                         'status' => 200,
                         'message' => 'Logged out successfully.',
-                        'guard' => $guard, // Indicate which guard was logged out
+                        'guard' => $guard,
                     ], 200);
                 }
             }
