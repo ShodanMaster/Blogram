@@ -61,6 +61,7 @@ Route::middleware('checkuser')->group(function(){
     Route::post('/follow/{userId}', [FollowController::class, 'follow'])->name('follow');
     Route::post('/unfollow/{userId}', [FollowController::class, 'unfollow'])->name('unfollow');
 
+    Route::get('/search-users', [IndexController::class, 'searchUsers'])->name('searchusers');
     Route::post('report', [IndexController::class, 'report'])->name('report');
 });
 

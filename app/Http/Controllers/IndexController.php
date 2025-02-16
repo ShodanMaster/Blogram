@@ -120,4 +120,22 @@ class IndexController extends Controller
 
     }
 
+    public function searchUsers(Request $request)
+    {
+        $users = User::where('name', 'LIKE', '%' . $request->search . '%')
+                    ->where('ban', false)
+                    ->limit(10)
+                    ->get();
+
+        // Encrypt user ID before sending
+        $users->transform(function ($user) {
+            $user->encrypted_id = encrypt($user->id);
+            return $user;
+        });
+
+        return response()->json($users);
+    }
+
+
+
 }

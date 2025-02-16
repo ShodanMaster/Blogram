@@ -11,6 +11,20 @@
     <link rel="stylesheet" href="{{asset('sweetalert/sweetalert2.min.css')}}">
     @stack('head')
 
+    <style>
+        #userList {
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+    </style>
 </head>
 <body class="bg-dark text-white">
     @yield('main')

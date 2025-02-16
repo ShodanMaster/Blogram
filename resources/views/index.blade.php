@@ -59,7 +59,12 @@
     </div>
 </div>
 
-<h1>Blogram</h1>
+<div class="d-flex flex-column position-relative">
+    <h1>Blogram</h1>
+    <input type="text" class="form-control mt-3 mb-3" id="searchUser" data-url="{{ route('searchusers') }}" placeholder="Search user...">
+    <div id="userList" class="position-absolute bg-light rounded shadow p-2 d-none"></div>
+</div>
+
 <div id="blog-container">
 
     @foreach($followersBlogs as $userFollow)
@@ -252,237 +257,288 @@
 </script>
 
 <script>
-    let page = 2; // Start from page 2
-    let loading = false; // Flag to prevent multiple simultaneous requests
+    $(document).ready( function () {
 
-    // Function to check if the user has scrolled to the bottom of the page
-    $(window).on('scroll', function() {
-        // Check if the user has scrolled to the bottom of the page
-        if (!loading && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-            loading = true;  // Set the loading flag to prevent multiple requests
-            $('#loading-spinner').show();  // Show the loading spinner
+        let typingTimer;
+    let doneTypingInterval = 300; // Delay before sending the AJAX request
 
-            // Make the AJAX request to load more blogs
-            $.ajax({
-                url: "{{ route('loadMoreBlogs') }}",
-                method: 'GET',
-                data: { page: page },
-                success: function(response) {
-                    // Append the new blogs to the container
-                    $('#blog-container').append(response.blogs);
+    $('#searchUser').on('input', function () {
+        clearTimeout(typingTimer); // Clear previous timer
+        let query = $(this).val().trim();
+        let searchUrl = $(this).data('url');
+        let userList = $('#userList');
 
-                    // Update the page number
-                    page++;
+        if (query.length > 0) {
+            typingTimer = setTimeout(function () {
+                $.ajax({
+                    url: searchUrl,
+                    method: "GET",
+                    data: { search: query },
+                    dataType: "json",
+                    success: function (response) {
+                        userList.html('').removeClass('d-none');
 
-                    // If there's no next page, stop further AJAX requests
-                    if (!response.next_page) {
-                        $(window).off('scroll');  // Disable scroll event if no more pages
+                        if (response.length > 0) {
+                            let resultsHtml = '<ul class="list-group">';
+                            response.forEach(user => {
+                                resultsHtml += `
+                                    <li class="list-group-item">
+                                        <a href="/profile/user-profile/${user.encrypted_id}" class="text-dark">${user.name}</a>
+                                    </li>`;
+                            });
+                            resultsHtml += '</ul>';
+                            userList.html(resultsHtml);
+                        } else {
+                            userList.html('<p class="text-muted p-2">No users found</p>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", status, error);
                     }
+                });
+            }, doneTypingInterval); // Wait for user to stop typing
+        } else {
+            userList.html('').addClass('d-none');
+        }
+    });
 
-                    // Hide the loading spinner and reset the loading flag
-                    $('#loading-spinner').hide();
-                    loading = false;
-                },
-                error: function() {
-                    alert('There was an error loading more blogs.');
-                    $('#loading-spinner').hide();  // Hide the loading spinner
-                    loading = false;  // Reset the loading flag
+    // Hide search results when clicking outside
+    $(document).click(function (e) {
+        if (!$('#searchUser').is(e.target) && !$('#userList').is(e.target) && $('#userList').has(e.target).length === 0) {
+            $('#userList').addClass('d-none');
+        }
+    });
+        let page = 2; // Start from page 2
+        let loading = false; // Flag to prevent multiple simultaneous requests
+
+        // Function to check if the user has scrolled to the bottom of the page
+        $(window).on('scroll', function() {
+            // Check if the user has scrolled to the bottom of the page
+            if (!loading && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                loading = true;  // Set the loading flag to prevent multiple requests
+                $('#loading-spinner').show();  // Show the loading spinner
+
+                // Make the AJAX request to load more blogs
+                $.ajax({
+                    url: "{{ route('loadMoreBlogs') }}",
+                    method: 'GET',
+                    data: { page: page },
+                    success: function(response) {
+                        // Append the new blogs to the container
+                        $('#blog-container').append(response.blogs);
+
+                        // Update the page number
+                        page++;
+
+                        // If there's no next page, stop further AJAX requests
+                        if (!response.next_page) {
+                            $(window).off('scroll');  // Disable scroll event if no more pages
+                        }
+
+                        // Hide the loading spinner and reset the loading flag
+                        $('#loading-spinner').hide();
+                        loading = false;
+                    },
+                    error: function() {
+                        alert('There was an error loading more blogs.');
+                        $('#loading-spinner').hide();  // Hide the loading spinner
+                        loading = false;  // Reset the loading flag
+                    }
+                });
+            }
+        });
+
+        $('#editBlogModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var blogId = button.data('id'); // Extract info from data-* attributes
+            var blogTitle = button.data('title');
+            var blogContent = button.data('content');
+
+            // Populate the modal's fields with the data
+            var modal = $(this);
+            modal.find('#edit_blog_id').val(blogId);
+            modal.find('#edit_blog_title').val(blogTitle);
+            modal.find('#edit_blog_content').val(blogContent);
+
+            tinymce.get('edit_blog_content').setContent(blogContent);  // Initialize TinyMCE editor with blog content
+        });
+
+        $(document).on('submit', '#editBlog',function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-        }
-    });
 
-    $('#editBlogModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var blogId = button.data('id'); // Extract info from data-* attributes
-        var blogTitle = button.data('title');
-        var blogContent = button.data('content');
+            $.ajax({
+                type: "POST",
+                url: "{{route('blog.updateblog')}}",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    if (response.status == 200) {
+                        // Flash success message using SweetAlert2
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        });
 
-        // Populate the modal's fields with the data
-        var modal = $(this);
-        modal.find('#edit_blog_id').val(blogId);
-        modal.find('#edit_blog_title').val(blogTitle);
-        modal.find('#edit_blog_content').val(blogContent);
-
-        tinymce.get('edit_blog_content').setContent(blogContent);  // Initialize TinyMCE editor with blog content
-    });
-
-    $(document).on('submit', '#editBlog',function (e) {
-        e.preventDefault();
-
-        var formData = new FormData(this);
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        $.ajax({
-            type: "POST",
-            url: "{{route('blog.updateblog')}}",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                console.log(response);
-                if (response.status == 200) {
-                    // Flash success message using SweetAlert2
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: response.message,
-                        confirmButtonText: 'OK'
-                    });
-
-                    setTimeout(function() {
-                        $('#createBlogModal').modal('hide');
-                        location.reload();
-                    }, 2000);
-                } else if (response.status == 404) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Not Found',
-                                text: response.message,
-                                confirmButtonText: 'OK'
-                            }).then(function() {
-                                location.reload();
-                            });
-                } else {
-                    // Flash error message using SweetAlert2
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: response.message,
-                        confirmButtonText: 'OK'
-                    });
-                }
-
-            },
-            error: function(xhr, status, error) {
-                // Flash error if request fails and show the specific error message
-
-                // If validation errors are returned from Laravel
-                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
-                    let errorMessage = 'Validation errors occurred:';
-
-                    // Loop through the validation errors and show them in a single message
-                    $.each(xhr.responseJSON.errors, function(field, messages) {
-                        errorMessage += `\n${messages.join(', ')}`;
-                    });
-
-                    // Show the validation errors in SweetAlert2
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation Errors!',
-                        text: errorMessage,
-                        confirmButtonText: 'OK'
-                    });
-                } else {
-                    // If some other error occurs (e.g., server error)
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Something went wrong. Please try again.',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            }
-        });
-
-    });
-
-    $(document).on('click', '#likeButton', function (e) {
-        e.preventDefault();  // Prevent the default action
-
-        var blogId = $(this).val();  // Get the blog ID from the button value
-        var button = $(this);  // The like/unlike button
-        var likeCountElement;  // The like count span for this blog
-
-        $.ajax({
-            url: "{{ route('blog.likeblog') }}",  // Your route for liking the blog
-            method: 'POST',
-            data: {
-                blog_id: blogId,
-                _token: '{{ csrf_token() }}',  // CSRF token for security
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    // Toggle the button text based on the response
-                    if (response.message === 'added') {
-                        button.text('Unlike');  // Change button text to 'Unlike'
+                        setTimeout(function() {
+                            $('#createBlogModal').modal('hide');
+                            location.reload();
+                        }, 2000);
+                    } else if (response.status == 404) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Not Found',
+                                    text: response.message,
+                                    confirmButtonText: 'OK'
+                                }).then(function() {
+                                    location.reload();
+                                });
                     } else {
-                        button.text('Like');  // Change button text back to 'Like'
+                        // Flash error message using SweetAlert2
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: response.message,
+                            confirmButtonText: 'OK'
+                        });
                     }
 
-                    // Update the like count on the UI
-                    likeCountElement = $('#likeCount' + response.blogId);
-                    likeCountElement.text(response.likeCount + ' Likes');  // Set the new like count
-                } else {
-                    alert('Something went wrong. Please try again.');
+                },
+                error: function(xhr, status, error) {
+                    // Flash error if request fails and show the specific error message
+
+                    // If validation errors are returned from Laravel
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        let errorMessage = 'Validation errors occurred:';
+
+                        // Loop through the validation errors and show them in a single message
+                        $.each(xhr.responseJSON.errors, function(field, messages) {
+                            errorMessage += `\n${messages.join(', ')}`;
+                        });
+
+                        // Show the validation errors in SweetAlert2
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Errors!',
+                            text: errorMessage,
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        // If some other error occurs (e.g., server error)
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Something went wrong. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                alert('There was an error. Please try again later.');
+            });
+
+        });
+
+        $(document).on('click', '#likeButton', function (e) {
+            e.preventDefault();  // Prevent the default action
+
+            var blogId = $(this).val();  // Get the blog ID from the button value
+            var button = $(this);  // The like/unlike button
+            var likeCountElement;  // The like count span for this blog
+
+            $.ajax({
+                url: "{{ route('blog.likeblog') }}",  // Your route for liking the blog
+                method: 'POST',
+                data: {
+                    blog_id: blogId,
+                    _token: '{{ csrf_token() }}',  // CSRF token for security
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Toggle the button text based on the response
+                        if (response.message === 'added') {
+                            button.text('Unlike');  // Change button text to 'Unlike'
+                        } else {
+                            button.text('Like');  // Change button text back to 'Like'
+                        }
+
+                        // Update the like count on the UI
+                        likeCountElement = $('#likeCount' + response.blogId);
+                        likeCountElement.text(response.likeCount + ' Likes');  // Set the new like count
+                    } else {
+                        alert('Something went wrong. Please try again.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('There was an error. Please try again later.');
+                }
+            });
+        });
+
+        $('#reportModal').on('show.bs.modal', function (event) {
+            // Get the data attributes passed with the link
+            var button = $(event.relatedTarget);  // Button that triggered the modal
+            var blogId = button.data('blogid');   // Get the blogId from the data-blogId attribute
+            var userId = button.data('userid');   // Get the userId from the data-userId attribute
+            var commentId = button.data('commentid');  // Get the commentId from the data-commentId attribute
+
+            // Populate the modal's hidden fields
+            var modal = $(this);
+            modal.find('#reportBlogId').val(blogId);
+            modal.find('#reportUserId').val(userId);
+            modal.find('#reportCommentId').val(commentId);
+        });
+
+        $('#reportModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+
+            // Retrieve data attributes from the clicked button
+            var buttonName = button.data('name');
+            var blogId = button.data('blogid');
+            var userId = button.data('userid');
+            var commentId = button.data('commentid');
+
+            console.log(buttonName);
+
+            // Pass the data to the modal form fields
+            var modal = $(this);
+
+            if(buttonName === 'blog'){
+                modal.find('#reportModalLabel').html('Report Blog');
+            }
+
+            if(buttonName === 'user'){
+                modal.find('#reportModalLabel').html('Report User');
+            }
+
+            // Reset form fields before populating
+            $('#reportUserId').val('');
+            $('#reportBlogId').val('');
+            $('#reportCommentId').val('');
+            $('#reason').val('');
+
+            if (userId) {
+                modal.find('#reportUserId').val(userId);
+            }
+
+            if (blogId) {
+                modal.find('#reportBlogId').val(blogId);
+            }
+
+            if (commentId) {
+                modal.find('#reportCommentId').val(commentId);
             }
         });
     });
-
-    $('#reportModal').on('show.bs.modal', function (event) {
-        // Get the data attributes passed with the link
-        var button = $(event.relatedTarget);  // Button that triggered the modal
-        var blogId = button.data('blogid');   // Get the blogId from the data-blogId attribute
-        var userId = button.data('userid');   // Get the userId from the data-userId attribute
-        var commentId = button.data('commentid');  // Get the commentId from the data-commentId attribute
-
-        // Populate the modal's hidden fields
-        var modal = $(this);
-        modal.find('#reportBlogId').val(blogId);
-        modal.find('#reportUserId').val(userId);
-        modal.find('#reportCommentId').val(commentId);
-    });
-
-    $('#reportModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-
-        // Retrieve data attributes from the clicked button
-        var buttonName = button.data('name');
-        var blogId = button.data('blogid');
-        var userId = button.data('userid');
-        var commentId = button.data('commentid');
-
-        console.log(buttonName);
-
-        // Pass the data to the modal form fields
-        var modal = $(this);
-
-        if(buttonName === 'blog'){
-            modal.find('#reportModalLabel').html('Report Blog');
-        }
-
-        if(buttonName === 'user'){
-            modal.find('#reportModalLabel').html('Report User');
-        }
-
-        // Reset form fields before populating
-        $('#reportUserId').val('');
-        $('#reportBlogId').val('');
-        $('#reportCommentId').val('');
-        $('#reason').val('');
-
-        if (userId) {
-            modal.find('#reportUserId').val(userId);
-        }
-
-        if (blogId) {
-            modal.find('#reportBlogId').val(blogId);
-        }
-
-        if (commentId) {
-            modal.find('#reportCommentId').val(commentId);
-        }
-    });
-
 </script>
 @endsection
