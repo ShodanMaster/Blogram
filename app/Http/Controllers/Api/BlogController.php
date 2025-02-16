@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use Exception;
 use Illuminate\Http\Request;
@@ -39,8 +40,14 @@ class BlogController extends Controller
 
     public function updateBlog(Request $request){
         // dd($request->all());
+        $request->validate([
+            'id' => 'required|integer|exists:blogs,id',
+            'title' => 'required|string',
+            'content' => 'required|string',
+        ]);
+
         try{
-            $blog = Blog::find(decrypt($request->id));
+            $blog = Blog::find($request->id);
 
             if ($blog && Auth::user()->id == $blog->user_id) {
                 $blog->update([
@@ -56,7 +63,7 @@ class BlogController extends Controller
             } else {
                 return response()->json([
                     'status' => 404,
-                    'message' => 'Blog Not Found',
+                    'message' => 'Blog Not Found or Unauthorized',
                 ], 404);
             }
         } catch (Exception $e) {
@@ -70,11 +77,11 @@ class BlogController extends Controller
     public function deleteBlog(Request $request){
 
         $validated = $request->validate([
-            'id' => 'required|string'
+            'id' => ''
         ]);
 
         try {
-            $blog = Blog::find(decrypt($request->id));
+            $blog = Blog::find($request->id);
 
             if ($blog && Auth::user()->id == $blog->user_id) {
                 $blog->delete();
@@ -82,12 +89,11 @@ class BlogController extends Controller
                 return response()->json([
                     'status' => 200,
                     'message' => 'Blog Deleted Successfully',
-                    'url' => route('profile.index'),
                 ], 200);
             } else {
                 return response()->json([
                     'status' => 404,
-                    'message' => 'Blog Not Found',
+                    'message' => 'Blog Not Found or Unauthorized',
                 ], 404);
             }
         } catch (Exception $e) {
@@ -99,7 +105,11 @@ class BlogController extends Controller
     }
 
     public function likeBlog(Request $request){
-        $blogId = decrypt($request->blog_id);  // Decrypt the blog ID
+        $request->validate([
+            'blog_id' => 'required|integer|exists:blogs,id',
+        ]);
+
+        $blogId = $request->blog_id;
         $blog = Blog::find($blogId);
 
         if ($blog) {
@@ -134,5 +144,4 @@ class BlogController extends Controller
             'message' => 'Blog not found.',
         ]);
     }
-
 }

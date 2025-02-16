@@ -90,4 +90,3 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 Route::get('restricted', function(){
     return view('restricted');
 })->name('restricted');
-

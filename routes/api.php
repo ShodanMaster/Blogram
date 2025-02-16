@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\FollowController;
+use App\Http\Controllers\Api\IndexController;
 use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,4 +47,26 @@ Route::middleware('auth:adminapi')->prefix('admin')->group(function(){
 
     Route::get('refresh', [LoginController::class, 'refreshToken']);
     Route::get('logging-out', [LoginController::class, 'loggingOut']);
+});
+
+Route::middleware('auth:webapi')->group(function(){
+    Route::get('', [IndexController::class, 'index']);
+    Route::post('report', [IndexController::class, 'report']);
+
+    Route::post('store-blog', [BlogController::class, 'storeBlog']);
+    Route::post('update-blog', [BlogController::class, 'updateBlog']);
+    Route::post('delete-blog', [BlogController::class, 'deleteBlog']);
+    Route::post('like-blog', [BlogController::class, 'likeBlog']);
+
+    Route::get('conversation/{id}', [CommentController::class, 'conversation']);
+    Route::post('store-comment', [CommentController::class, 'storeComment']);
+    Route::post('delete-comment', [CommentController::class, 'deleteComment']);
+
+    Route::get('profile', [ProfileController::class, 'index'])->name('index');
+    Route::post('update-profile', [ProfileController::class, 'updateProfile']);
+    Route::get('user-profile/{id}', [ProfileController::class, 'userProfile'])->name('userprofile');
+
+    Route::post('/follow-unfollow/{userId}', [FollowController::class, 'toggleFollow']);
+
+
 });

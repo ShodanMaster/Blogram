@@ -14,11 +14,18 @@ class IndexController extends Controller
 {
     public function index(){
         $followersBlogs = Auth::user()
-            ->following()  // Get the users the authenticated user is following
-            ->with(['followedUser.blogs' => function($query) {
-                $query->latest()->take(10);  // Eager load the latest 10 blogs of followed users
+            ->following()
+            ->whereHas('followedUser', function ($query) {
+                $query->where('ban', false);
+            })
+            ->with(['followedUser' => function ($query) {
+                $query->where('ban', false);
+            }, 'followedUser.blogs' => function ($query) {
+                $query->where('ban', false)->latest()->take(10);
             }])
             ->get();
+
+
         $blogs = Blog::where('ban', false)->latest()->paginate(10);
         return view('index', compact('blogs', 'followersBlogs'));
     }
