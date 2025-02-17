@@ -67,6 +67,6 @@ Route::middleware('auth:webapi')->group(function(){
     Route::get('user-profile/{id}', [ProfileController::class, 'userProfile'])->name('userprofile');
 
     Route::post('/follow-unfollow/{userId}', [FollowController::class, 'toggleFollow']);
-
+    Route::post('search-users', [IndexController::class, 'searchUsers']);
 
 });

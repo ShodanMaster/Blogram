@@ -108,4 +108,24 @@ class IndexController extends Controller
         }
 
     }
+
+    public function searchUsers(Request $request){
+        // dd($request->all());
+        $users = User::where('name', 'LIKE', '%' . $request->search . '%')
+                    ->where('ban', false)
+                    ->limit(10)
+                    ->get();
+        if ($users->isNotEmpty()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Users Found',
+                'data' => $users
+            ]);
+        }
+
+        return response()->json([
+            'status' => 404,
+            'message' => 'Users Not Found'
+        ]);
+    }
 }
